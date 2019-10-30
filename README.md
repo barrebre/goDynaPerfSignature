@@ -26,7 +26,8 @@ The required parameters on the POST are:
 * **ServiceID** - The ID of the Service which you'd like to inspect. This can be found in the UI if you are looking at a Service and pull from its url `id=SERVICE-...`
 
 ### Example
-From another terminal, you can make requests to the app via a curl like this one: 
+From another terminal, you can make requests to the app via a curl like this one:
+
 ```curl -v -XPOST -d '{"APIToken":"S2pMHW_FSlma-PPJIj3l5","MetricIDs":["builtin:service.response.time","builtin:service.errors.total.rate"],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature```
 
 # Todo
