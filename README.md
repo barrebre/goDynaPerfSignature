@@ -2,7 +2,7 @@
 
 This repo will be a standalone Go application which will allow users to query their Dynatrace environments and compare the performance of current code deployments to previous ones.
 
-**Current State** - This will receive the timestamps of the most recent Dynatrace Deployment Events.
+**Current State** - This will receive the timestamps of the most recent Dynatrace Deployment Events and compare the Response Time and Error Count of those two deployments to look for regressions.
 
 # Usage
 ## Requirements
@@ -18,9 +18,16 @@ First, you will need to build the docker image. To do so
 ## Running Locally via Go
 You can test this locally by simply calling `go run .`
 
-### Example CURL command
+## Interacting with the API
+The required parameters on the POST are:
+* **APIToken** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`
+* **MetricIDs** - A comma-delimited array of the metrics you'd like to compare, which can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API.
+  * **Important** - This is not actually implemented at this point. Unfortunately, `["builtin:service.response.time","builtin:service.errors.total.rate"]` has to be passed through the curl command and it's the only valid operator. This will be fixed soon.
+* **ServiceID** - The ID of the Service which you'd like to inspect. This can be found in the UI if you are looking at a Service and pull from its url `id=SERVICE-...`
+
+### Example
 From another terminal, you can make requests to the app via a curl like this one: 
 ```curl -v -XPOST -d '{"APIToken":"S2pMHW_FSlma-PPJIj3l5","MetricIDs":["builtin:service.response.time","builtin:service.errors.total.rate"],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature```
 
 # Todo
-Testing...I know
+Testing...I know. Any other feedback can be posted in the Github Issues.
