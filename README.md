@@ -13,7 +13,13 @@ This app requires some ENV vars to be set:
 ## Running Locally via Docker
 First, you will need to build the docker image. To do so
 1. Run `docker build -t go-dyna-perf-signature .`
-1. Then `docker run --env-file ./docker_env go-dyna-perf-signature` 
+1. Then `docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env go-dyna-performance-signature`
+
+A clean way to run this in Windows is
+
+```
+docker ps -a -q -f name=go-dyna-perf-signature | % { docker stop $_ }; docker ps -a -q -f name=go-dyna-perf-signature | % { docker rm $_ }; docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env go-dyna-perf-signature
+```
 
 ## Running Locally via Go
 You can test this locally by simply calling `go run .`
@@ -28,7 +34,15 @@ The required parameters on the POST are:
 ### Example
 From another terminal, you can make requests to the app via a curl like this one:
 
-```curl -v -XPOST -d '{"APIToken":"S2pMHW_FSlma-PPJIj3l5","MetricIDs":["builtin:service.response.time","builtin:service.errors.total.rate"],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature```
+```
+curl -v -XPOST -d '{"APIToken":"S2pMHW_FSlma-PPJIj3l5","MetricIDs":["builtin:service.response.time:(avg)","builtin:service.errors.total.rate:(avg)"],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+```
+
+## Development Building One-Liner
+```
+docker build -t go-dyna-perf-signature:latest .; docker ps -a -q -f name=go-dyna-perf-signature | % { docker stop $_ }; docker ps -a -q -f name=go-dyna-perf-signature | % { docker rm $_ }; docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env go-dyna-perf-signature
+```
 
 # Todo
 Testing...I know. Any other feedback can be posted in the Github Issues.
+

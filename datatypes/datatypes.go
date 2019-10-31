@@ -47,8 +47,8 @@ type BuiltinServiceErrorsTotalRate struct {
 
 // Metrics lists the metrics options we can currently use
 type Metrics struct {
-	BuiltinServiceResponseTime    BuiltinServiceResponseTime    `json:"builtin:service.response.time"`
-	BuiltinServiceErrorsTotalRate BuiltinServiceErrorsTotalRate `json:"builtin:service.errors.total.rate"`
+	BuiltinServiceResponseTime    BuiltinServiceResponseTime    `json:"builtin:service.response.time:avg"`
+	BuiltinServiceErrorsTotalRate BuiltinServiceErrorsTotalRate `json:"builtin:service.errors.total.rate:avg"`
 }
 
 // ComparisonMetrics has a current and previous set of metrics to compare

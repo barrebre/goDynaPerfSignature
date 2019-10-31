@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
@@ -57,8 +60,13 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	if err != nil {
 		return datatypes.ComparisonMetrics{}, err
 	}
-	if len(currentMetricsResponse.Metrics.BuiltinServiceErrorsTotalRate.MetricValues) < 1 {
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no data points found in the current metrics: %v", currentMetricsResponse)
+	numberOfMetrics := len(currentMetricsResponse.Metrics.BuiltinServiceErrorsTotalRate.MetricValues)
+	if numberOfMetrics < 1 {
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Error Rate data points found in the current metrics: %v", spew.Sdump(currentMetricsResponse.Metrics))
+	}
+	numberOfMetrics = len(currentMetricsResponse.Metrics.BuiltinServiceResponseTime.MetricValues)
+	if numberOfMetrics < 1 {
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Response Time data points found in the current metrics: %v", spew.Sdump(currentMetricsResponse.Metrics))
 	}
 
 	// Get the second set of metrics
@@ -98,8 +106,13 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	if err != nil {
 		return datatypes.ComparisonMetrics{}, err
 	}
-	if len(previousMetricsResponse.Metrics.BuiltinServiceErrorsTotalRate.MetricValues) < 1 {
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no data points found in the previous metrics: %v", previousMetricsResponse)
+	numberOfMetrics = len(previousMetricsResponse.Metrics.BuiltinServiceErrorsTotalRate.MetricValues)
+	if numberOfMetrics < 1 {
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Error Rate data points found in the previous event metrics: %v", spew.Sdump(previousMetricsResponse.Metrics))
+	}
+	numberOfMetrics = len(previousMetricsResponse.Metrics.BuiltinServiceResponseTime.MetricValues)
+	if numberOfMetrics < 1 {
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Response Time data points found in the previous event metrics: %v", spew.Sdump(previousMetricsResponse.Metrics))
 	}
 
 	var bothMetricSets = datatypes.ComparisonMetrics{
@@ -124,7 +137,7 @@ func CompareMetrics(metrics datatypes.ComparisonMetrics) (string, error) {
 
 	currResTime := metrics.CurrentMetrics.BuiltinServiceResponseTime.MetricValues[0].Value
 	prevResTime := metrics.PreviousMetrics.BuiltinServiceResponseTime.MetricValues[0].Value
-	responseTimeDelta := currResTime - prevResTime
+	responseTimeDelta := (currResTime - prevResTime) / 1000
 	// fmt.Printf("RT: %v, from %v to %v.\n", responseTimeDelta, prevResTime, currResTime)
 
 	if responseTimeDelta > 0 {
@@ -132,6 +145,6 @@ func CompareMetrics(metrics datatypes.ComparisonMetrics) (string, error) {
 		return rtMessage, fmt.Errorf("Response time increase of %vms", responseTimeDelta)
 	}
 
-	successResponse := fmt.Sprintf("Successful deploy! RT decreased by %vms and error rate decreased by %v%%", responseTimeDelta, errorRateDelta)
+	successResponse := fmt.Sprintf("Successful deploy! RT decreased by %vms and error rate decreased by %v%%.\n", math.Abs(responseTimeDelta), errorRateDelta)
 	return successResponse, nil
 }

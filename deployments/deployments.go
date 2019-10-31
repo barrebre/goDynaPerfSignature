@@ -14,7 +14,7 @@ import (
 func GetDeploymentTimestamps(config datatypes.Config, serviceID string, apiToken string) (timestamps []datatypes.Timestamps, err error) {
 	// Build the URL
 	url := fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", config.Server, config.Env, serviceID)
-	fmt.Printf("Made URL: %v\n", url)
+	// fmt.Printf("Made URL: %v\n", url)
 
 	// Build the request object
 	req, err := http.NewRequest("GET", url, nil)
@@ -69,6 +69,12 @@ func GetDeploymentTimestamps(config datatypes.Config, serviceID string, apiToken
 			EndTime:   deploymentEvents.Events[1].EndTime,
 		},
 	}
+
+	currentStartPretty := time.Unix(timestampsToCompare[0].StartTime/1000, 000)
+	currentEndPretty := time.Unix(timestampsToCompare[0].EndTime/1000, 000)
+	previousStartPretty := time.Unix(timestampsToCompare[1].StartTime/1000, 000)
+	previousEndPretty := time.Unix(timestampsToCompare[1].EndTime/1000, 000)
+	fmt.Printf("Found previous deployment from %v to %v and current deployment from %v to %v.\n", previousStartPretty, previousEndPretty, currentStartPretty, currentEndPretty)
 
 	return timestampsToCompare, nil
 }

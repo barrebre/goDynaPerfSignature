@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:alpine
 WORKDIR /go/src/barrebre/goDynaPerfSignature
 ADD . /go/src/barrebre/goDynaPerfSignature
 RUN go build -o main .
