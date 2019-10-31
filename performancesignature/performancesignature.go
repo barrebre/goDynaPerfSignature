@@ -35,10 +35,17 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
 	}
 
-	successText, err := metrics.GetMetricsAndCompare(config, performanceSignature, timestamps)
+	metricsResponse, err := metrics.GetMetrics(config, performanceSignature, timestamps)
 	if err != nil {
-		fmt.Printf("Encountered error processing metrics: %v\n", err)
-		return "", 406, fmt.Errorf("Encountered error processing metrics: %v", err)
+		fmt.Printf("Encountered error gathering metrics: %v\n", err)
+		return "", 503, fmt.Errorf("Encountered error gathering metrics: %v", err)
+	}
+
+	successText, err := metrics.CompareMetrics(metricsResponse)
+	if err != nil {
+		responseText := fmt.Sprintf("Metric degradation found: %v\n", err)
+		fmt.Printf(responseText)
+		return "", 406, fmt.Errorf(responseText)
 	}
 
 	return successText, 0, nil
