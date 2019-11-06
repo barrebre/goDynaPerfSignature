@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"barrebre/goDynaPerfSignature/datatypes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"barrebre/goDynaPerfSignature/datatypes"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -22,7 +23,13 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	safeMetricNames := url.QueryEscape(metricNames)
 
 	// Build the URL
-	url := fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, config.Env, safeMetricNames, ts[0].StartTime, ts[0].EndTime, ps.ServiceID)
+	var url string
+
+	if config.Env == "" {
+		url = fmt.Sprintf("https://%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, safeMetricNames, ts[0].StartTime, ts[0].EndTime, ps.ServiceID)
+	} else {
+		url = fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, config.Env, safeMetricNames, ts[0].StartTime, ts[0].EndTime, ps.ServiceID)
+	}
 	// fmt.Printf("Made URL: %v\n", url)
 
 	// Build the request object
@@ -46,8 +53,8 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	}
 	// Check the status code
 	if r.StatusCode != 200 {
-		fmt.Printf("Invalid status code from Dynatrace: %v", r.StatusCode)
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
+		fmt.Printf("Invalid status code from Dynatrace: %v.\n", r.StatusCode)
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("Invalid status code from Dynatrace: %v - ", r.StatusCode)
 	}
 
 	// Read in the body
@@ -71,7 +78,11 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 
 	// Get the second set of metrics
 	// Build the URL
-	url = fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, config.Env, safeMetricNames, ts[1].StartTime, ts[1].EndTime, ps.ServiceID)
+	if config.Env == "" {
+		url = fmt.Sprintf("https://%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, safeMetricNames, ts[1].StartTime, ts[1].EndTime, ps.ServiceID)
+	} else {
+		url = fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, config.Env, safeMetricNames, ts[1].StartTime, ts[1].EndTime, ps.ServiceID)
+	}
 	// fmt.Printf("Made URL: %v\n", url)
 
 	// Build the request object
@@ -92,7 +103,7 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	}
 	// Check the status code
 	if r.StatusCode != 200 {
-		fmt.Printf("Invalid status code from Dynatrace: %v", r.StatusCode)
+		fmt.Printf("Invalid status code from Dynatrace: %v.\n", r.StatusCode)
 		return datatypes.ComparisonMetrics{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 

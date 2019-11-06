@@ -18,9 +18,10 @@ func GetConfig() (datatypes.Config, error) {
 
 	env := os.Getenv("DT_ENV")
 	if env == "" {
-		return datatypes.Config{}, fmt.Errorf("Error finding the DT_ENV in the env")
+		fmt.Printf("A Dynatrace environment was not provided. If your tenant has multiple environments, you will need to include this.\n")
+	} else {
+		fmt.Printf("Successfully loaded DT_ENV: %v.\n", env)
 	}
-	fmt.Printf("Successfully loaded DT_ENV: %v.\n", env)
 
 	config := datatypes.Config{
 		Env:    env,
