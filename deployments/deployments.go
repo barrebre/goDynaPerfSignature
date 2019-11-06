@@ -13,8 +13,14 @@ import (
 // GetDeploymentTimestamps Gets the timestamps from the two most recent Dynatrace Deployment Events
 func GetDeploymentTimestamps(config datatypes.Config, serviceID string, apiToken string) (timestamps []datatypes.Timestamps, err error) {
 	// Build the URL
-	url := fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", config.Server, config.Env, serviceID)
-	// fmt.Printf("Made URL: %v\n", url)
+	var url string
+
+	if config.Env == "" {
+		url = fmt.Sprintf("https://%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", config.Server, serviceID)
+	} else {
+		url = fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", config.Server, config.Env, serviceID)
+	}
+	fmt.Printf("Made URL: %v\n", url)
 
 	// Build the request object
 	req, err := http.NewRequest("GET", url, nil)
@@ -38,7 +44,7 @@ func GetDeploymentTimestamps(config datatypes.Config, serviceID string, apiToken
 	// Check the status code
 	if r.StatusCode != 200 {
 		fmt.Printf("Invalid status code from Dynatrace: %v", r.StatusCode)
-		return make([]datatypes.Timestamps, 0), fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
+		return make([]datatypes.Timestamps, 0), fmt.Errorf("Invalid status code from Dynatrace: %v - ", r.StatusCode)
 	}
 
 	// Read in the body

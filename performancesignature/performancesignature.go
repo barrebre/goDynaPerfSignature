@@ -34,6 +34,9 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 		fmt.Printf("Encountered error gathering event timestamps: %v\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
 	}
+	if len(timestamps) < 2 {
+		return fmt.Sprintln("There were not enough deployment events on the service to test."), 200, nil
+	}
 
 	metricsResponse, err := metrics.GetMetrics(config, performanceSignature, timestamps)
 	if err != nil {

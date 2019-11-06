@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"barrebre/goDynaPerfSignature/datatypes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"barrebre/goDynaPerfSignature/datatypes"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -22,7 +23,13 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	safeMetricNames := url.QueryEscape(metricNames)
 
 	// Build the URL
-	url := fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, config.Env, safeMetricNames, ts[0].StartTime, ts[0].EndTime, ps.ServiceID)
+	var url string
+
+	if config.Env == "" {
+		url = fmt.Sprintf("https://%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, safeMetricNames, ts[0].StartTime, ts[0].EndTime, ps.ServiceID)
+	} else {
+		url = fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", config.Server, config.Env, safeMetricNames, ts[0].StartTime, ts[0].EndTime, ps.ServiceID)
+	}
 	// fmt.Printf("Made URL: %v\n", url)
 
 	// Build the request object

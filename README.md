@@ -6,9 +6,9 @@ This repo will be a standalone Go application which will allow users to query th
 
 # Usage
 ## Requirements
-This app requires some ENV vars to be set:
-* **DT_SERVER** - The Dynatrace Server to point to
-* **DT_ENV** - The Dynatrace environment to point to
+This app requires the following variables to be set in the **docker_env** file:
+* **DT_SERVER** *Required* - The Dynatrace Server to point to (FQDN)
+* **DT_ENV** *Optional* - The Dynatrace environment to point to, if your tenant has multiple environments
 
 ## Running Locally via Docker
 First, you will need to build the docker image. To do so
