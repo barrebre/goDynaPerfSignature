@@ -35,7 +35,7 @@ The required parameters on the POST are:
 From another terminal, you can make requests to the app via a curl like this one:
 
 ```
-curl -v -XPOST -d '{"APIToken":"S2pMHW_FSlma-PPJIj3l5","MetricIDs":["builtin:service.response.time:(avg)","builtin:service.errors.total.rate:(avg)"],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+curl -v -XPOST -d '{"APIToken":"S2pMHW_FSlma-PPJIj3l5","Metrics":[{"ID":"builtin:service.response.time:(avg)"},{"ID":"builtin:service.errors.total.rate:(avg)"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
 ```
 
 ## Development Building One-Liner

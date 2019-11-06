@@ -26,13 +26,6 @@ type DynatraceMetricsResponse struct {
 	Metrics     Metrics `json:"metrics"`
 }
 
-// MetricValues defines what we receive for each metric
-type MetricValues struct {
-	Dimensions []string `json:"dimensions"`
-	Timestamp  int64    `json:"timestamp"`
-	Value      float64  `json:"value"`
-}
-
 // Both of the following unique definitions could probably be updated to some map syntax
 
 // BuiltinServiceResponseTime has to be defined for some reason
@@ -45,22 +38,36 @@ type BuiltinServiceErrorsTotalRate struct {
 	MetricValues []MetricValues `json:"values"`
 }
 
-// Metrics lists the metrics options we can currently use
-type Metrics struct {
-	BuiltinServiceResponseTime    BuiltinServiceResponseTime    `json:"builtin:service.response.time:avg"`
-	BuiltinServiceErrorsTotalRate BuiltinServiceErrorsTotalRate `json:"builtin:service.errors.total.rate:avg"`
-}
-
 // ComparisonMetrics has a current and previous set of metrics to compare
 type ComparisonMetrics struct {
 	CurrentMetrics  Metrics
 	PreviousMetrics Metrics
 }
 
+// Metric defines a Dynatrace Service we'd like to investigate and how we'd like to validate it
+type Metric struct {
+	ID              string
+	StaticThreshold int64
+	Validation      string
+}
+
+// MetricValues defines what we receive for each metric
+type MetricValues struct {
+	Dimensions []string `json:"dimensions"`
+	Timestamp  int64    `json:"timestamp"`
+	Value      float64  `json:"value"`
+}
+
+// Metrics lists the metrics options we can currently use
+type Metrics struct {
+	BuiltinServiceResponseTime    BuiltinServiceResponseTime    `json:"builtin:service.response.time:avg"`
+	BuiltinServiceErrorsTotalRate BuiltinServiceErrorsTotalRate `json:"builtin:service.errors.total.rate:avg"`
+}
+
 // PerformanceSignature is a struct defining all of the parameters we need to calculate a performance signature
 type PerformanceSignature struct {
 	APIToken  string
-	MetricIDs []string
+	Metrics   []Metric
 	ServiceID string
 }
 
