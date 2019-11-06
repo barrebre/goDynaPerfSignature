@@ -104,7 +104,7 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	// Check the status code
 	if r.StatusCode != 200 {
 		fmt.Printf("Invalid status code from Dynatrace: %v.\n", r.StatusCode)
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("Invalid status code from Dynatrace: %v - ", r.StatusCode)
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 
 	// Read in the body
