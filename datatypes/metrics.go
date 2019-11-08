@@ -20,9 +20,9 @@ type ComparisonMetrics struct {
 
 // DynatraceMetricsResponse defines what we receive from the Dt Metrics v2 API
 type DynatraceMetricsResponse struct {
-	TotalCount  int    `json:"totalCount"`
-	NextPageKey string `json:"nextPageKey"`
-	Metrics     Metric `json:"metrics"`
+	TotalCount  int     `json:"totalCount"`
+	NextPageKey string  `json:"nextPageKey"`
+	Metrics     Metrics `json:"metrics"`
 }
 
 // Metric defines a Dynatrace Service we'd like to investigate and how we'd like to validate it

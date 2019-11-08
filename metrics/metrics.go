@@ -137,6 +137,8 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 			CurrentMetrics:  currentMetricsResponse.Metrics,
 			PreviousMetrics: previousMetricsResponse.Metrics,
 		}
+
+		// fmt.Println(spew.Sdump(bothMetricSets))
 		return bothMetricSets, nil
 	}
 	return metrics, nil

@@ -40,7 +40,7 @@ curl -v -XPOST -d '{"APIToken":"S2pMHW_FSlma-PPJIj3l5","Metrics":[{"ID":"builtin
 
 ## Development Building One-Liner
 ```
-docker build -t barrebre/go-dyna-perf-signature:latest .; docker ps -a -q -f name=go-dyna-perf-signature | % { docker stop $_ }; docker ps -a -q -f name=go-dyna-perf-signature | % { docker rm $_ }; docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env go-dyna-perf-signature
+docker ps -a -q -f name=go-dyna-perf-signature | % { docker stop $_ }; docker build -t barrebre/go-dyna-perf-signature:latest .; docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env barrebre/go-dyna-perf-signature
 ```
 
 # Todo
