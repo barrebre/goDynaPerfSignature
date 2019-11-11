@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"barrebre/goDynaPerfSignature/datatypes"
 	"barrebre/goDynaPerfSignature/deployments"
@@ -38,16 +37,16 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
 	}
 
-	// Print out the deployment event(s) we found
-	currentStartPretty := time.Unix(timestamps[0].StartTime/1000, 000)
-	currentEndPretty := time.Unix(timestamps[0].EndTime/1000, 000)
-	if len(timestamps) == 1 {
-		fmt.Printf("Found current deployment from %v to %v.\n", currentStartPretty, currentEndPretty)
-	} else if len(timestamps) == 2 {
-		previousStartPretty := time.Unix(timestamps[1].StartTime/1000, 000)
-		previousEndPretty := time.Unix(timestamps[1].EndTime/1000, 000)
-		fmt.Printf("Found previous deployment from %v to %v and current deployment from %v to %v.\n", previousStartPretty, previousEndPretty, currentStartPretty, currentEndPretty)
-	}
+	// // Print out the deployment event(s) we found
+	// currentStartPretty := time.Unix(timestamps[0].StartTime/1000, 000)
+	// currentEndPretty := time.Unix(timestamps[0].EndTime/1000, 000)
+	// if len(timestamps) == 1 {
+	// 	fmt.Printf("Found current deployment from %v to %v.\n", currentStartPretty, currentEndPretty)
+	// } else if len(timestamps) == 2 {
+	// 	previousStartPretty := time.Unix(timestamps[1].StartTime/1000, 000)
+	// 	previousEndPretty := time.Unix(timestamps[1].EndTime/1000, 000)
+	// 	fmt.Printf("Found previous deployment from %v to %v and current deployment from %v to %v.\n", previousStartPretty, previousEndPretty, currentStartPretty, currentEndPretty)
+	// }
 
 	// Get the requested metrics for the discovered timestamp(s)
 	metricsResponse, err := metrics.GetMetrics(config, performanceSignature, timestamps)
@@ -60,12 +59,21 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	// For each metric, perform its checks
 	successText := ""
 	for _, metric := range performanceSignature.Metrics {
-		fmt.Printf("Looking at metric %v\n", metric)
+		// fmt.Printf("Looking at metric %v\n", metric)
 		cleanMetricName := strings.ReplaceAll(metric.ID, "(", "")
 		cleanMetricName = strings.ReplaceAll(cleanMetricName, ")", "")
 		// fmt.Printf("Clean name is: %v\n", cleanMetricName)
 
+		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
+			return "", 400, fmt.Errorf("There were no current metrics found for %v", cleanMetricName)
+		}
 		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Value
+
+		// This is only an issue if trying a comparison
+		canCompare := true
+		if len(metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
+			canCompare = false
+		}
 		previousMetricValues := metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Value
 
 		switch checkCounts := metric.ValidationMethod; checkCounts {
@@ -80,6 +88,9 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 			successText += response
 		default:
 			// fmt.Println("Default check")
+			if !canCompare {
+				return "", 400, fmt.Errorf("No previous metrics to compare against for metric %v", cleanMetricName)
+			}
 			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v\n", err)
