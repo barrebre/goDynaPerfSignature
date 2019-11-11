@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"barrebre/goDynaPerfSignature/datatypes"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
@@ -56,12 +54,13 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	// Check the status code
 	if r.StatusCode != 200 {
 		fmt.Printf("Invalid status code from Dynatrace: %v.\n", r.StatusCode)
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("Invalid status code from Dynatrace: %v - ", r.StatusCode)
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 
 	// Read in the body
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+	// fmt.Println(string(b))
 
 	// Try to parse the response into MetricsResponses
 	var currentMetricsResponse datatypes.DynatraceMetricsResponse
@@ -69,17 +68,10 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	if err != nil {
 		return datatypes.ComparisonMetrics{}, err
 	}
-	numberOfMetrics := len(currentMetricsResponse.Metrics.BuiltinServiceErrorsTotalRate.MetricValues)
-	if numberOfMetrics < 1 {
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Error Rate data points found in the current metrics: %v", spew.Sdump(currentMetricsResponse.Metrics))
-	}
-	numberOfMetrics = len(currentMetricsResponse.Metrics.BuiltinServiceResponseTime.MetricValues)
-	if numberOfMetrics < 1 {
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Response Time data points found in the current metrics: %v", spew.Sdump(currentMetricsResponse.Metrics))
-	}
+	// fmt.Printf("Found current metrics: %v\n", currentMetricsResponse)
 
 	var metrics = datatypes.ComparisonMetrics{
-		CurrentMetrics: currentMetricsResponse.Metrics,
+		CurrentMetrics: currentMetricsResponse,
 	}
 
 	// Get the second set of metrics
@@ -124,18 +116,11 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 		if err != nil {
 			return datatypes.ComparisonMetrics{}, err
 		}
-		numberOfMetrics = len(previousMetricsResponse.Metrics.BuiltinServiceErrorsTotalRate.MetricValues)
-		if numberOfMetrics < 1 {
-			return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Error Rate data points found in the previous event metrics: %v", spew.Sdump(previousMetricsResponse.Metrics))
-		}
-		numberOfMetrics = len(previousMetricsResponse.Metrics.BuiltinServiceResponseTime.MetricValues)
-		if numberOfMetrics < 1 {
-			return datatypes.ComparisonMetrics{}, fmt.Errorf("There were no Response Time data points found in the previous event metrics: %v", spew.Sdump(previousMetricsResponse.Metrics))
-		}
+		// fmt.Printf("Found previous metrics: %v\n", previousMetricsResponse)
 
 		var bothMetricSets = datatypes.ComparisonMetrics{
-			CurrentMetrics:  currentMetricsResponse.Metrics,
-			PreviousMetrics: previousMetricsResponse.Metrics,
+			CurrentMetrics:  currentMetricsResponse,
+			PreviousMetrics: previousMetricsResponse,
 		}
 
 		// fmt.Println(spew.Sdump(bothMetricSets))
@@ -145,53 +130,27 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 }
 
 // CompareMetrics compares the metrics from the current and previous timeframe
-func CompareMetrics(metrics datatypes.ComparisonMetrics) (string, error) {
-	currErrRate := metrics.CurrentMetrics.BuiltinServiceErrorsTotalRate.MetricValues[0].Value
-	prevErrRate := metrics.PreviousMetrics.BuiltinServiceErrorsTotalRate.MetricValues[0].Value
-	errorRateDelta := currErrRate - prevErrRate
-	// fmt.Printf("Error rate: %v, from %v to %v.\n", errorRateDelta, prevErrRate, currErrRate)
+func CompareMetrics(curr float64, prev float64) (string, error) {
+	delta := curr - prev
 
-	if errorRateDelta > 0 {
-		errorMessage := fmt.Sprintf("The Error Rate increased since the previous test by %v, from %v to %v", errorRateDelta, prevErrRate, currErrRate)
-		return errorMessage, fmt.Errorf("Error rate increase of %v%%", errorRateDelta)
+	if delta > 0 {
+		errorMessage := fmt.Sprintf("The metric had a degradation from %v to %v", prev, curr)
+		return errorMessage, fmt.Errorf("Error rate increase of %v%%", delta)
 	}
 
-	currResTime := metrics.CurrentMetrics.BuiltinServiceResponseTime.MetricValues[0].Value
-	prevResTime := metrics.PreviousMetrics.BuiltinServiceResponseTime.MetricValues[0].Value
-	responseTimeDelta := (currResTime - prevResTime) / 1000
-	// fmt.Printf("RT: %v, from %v to %v.\n", responseTimeDelta, prevResTime, currResTime)
-
-	if responseTimeDelta > 0 {
-		rtMessage := fmt.Sprintf("The Response Time increased since the previous test by %v, from %v to %v", responseTimeDelta, prevResTime, currResTime)
-		return rtMessage, fmt.Errorf("Response time increase of %vms", responseTimeDelta)
-	}
-
-	successResponse := fmt.Sprintf("Successful deploy! RT decreased by %vms and error rate decreased by %v%%.\n", math.Abs(responseTimeDelta), errorRateDelta)
+	successResponse := fmt.Sprintf("Successful deploy! Improvement by %v.\n", math.Abs(delta))
 	return successResponse, nil
 }
 
 // CheckStaticThreshold compares the metrics from the current and previous timeframe
-func CheckStaticThreshold(metrics datatypes.ComparisonMetrics) (string, error) {
-	currErrRate := metrics.CurrentMetrics.BuiltinServiceErrorsTotalRate.MetricValues[0].Value
-	prevErrRate := metrics.PreviousMetrics.BuiltinServiceErrorsTotalRate.MetricValues[0].Value
-	errorRateDelta := currErrRate - prevErrRate
-	// fmt.Printf("Error rate: %v, from %v to %v.\n", errorRateDelta, prevErrRate, currErrRate)
+func CheckStaticThreshold(metric float64, threshold float64) (string, error) {
+	delta := metric - threshold
 
-	if errorRateDelta > 0 {
-		errorMessage := fmt.Sprintf("The Error Rate increased since the previous test by %v, from %v to %v", errorRateDelta, prevErrRate, currErrRate)
-		return errorMessage, fmt.Errorf("Error rate increase of %v%%", errorRateDelta)
+	if delta > 0 {
+		errorMessage := fmt.Sprintf("The metric was above the static threshold: %v, instead of a desired %v", metric, threshold)
+		return errorMessage, fmt.Errorf("The metric was above the static threshold: %v, instead of a desired %v", metric, threshold)
 	}
 
-	currResTime := metrics.CurrentMetrics.BuiltinServiceResponseTime.MetricValues[0].Value
-	prevResTime := metrics.PreviousMetrics.BuiltinServiceResponseTime.MetricValues[0].Value
-	responseTimeDelta := (currResTime - prevResTime) / 1000
-	// fmt.Printf("RT: %v, from %v to %v.\n", responseTimeDelta, prevResTime, currResTime)
-
-	if responseTimeDelta > 0 {
-		rtMessage := fmt.Sprintf("The Response Time increased since the previous test by %v, from %v to %v", responseTimeDelta, prevResTime, currResTime)
-		return rtMessage, fmt.Errorf("Response time increase of %vms", responseTimeDelta)
-	}
-
-	successResponse := fmt.Sprintf("Successful deploy! RT decreased by %vms and error rate decreased by %v%%.\n", math.Abs(responseTimeDelta), errorRateDelta)
+	successResponse := fmt.Sprintf("Metric fit static threshold: %v instead of %v.\n", metric, threshold)
 	return successResponse, nil
 }

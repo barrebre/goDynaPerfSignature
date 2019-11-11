@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"barrebre/goDynaPerfSignature/datatypes"
@@ -48,17 +49,29 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 		fmt.Printf("Found previous deployment from %v to %v and current deployment from %v to %v.\n", previousStartPretty, previousEndPretty, currentStartPretty, currentEndPretty)
 	}
 
+	// Get the requested metrics for the discovered timestamp(s)
 	metricsResponse, err := metrics.GetMetrics(config, performanceSignature, timestamps)
 	if err != nil {
 		fmt.Printf("Encountered error gathering metrics: %v\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering metrics: %v", err)
 	}
+	// fmt.Printf("Found metrics:\n%v\n", metricsResponse)
 
+	// For each metric, perform its checks
 	successText := ""
 	for _, metric := range performanceSignature.Metrics {
-		switch checkCounts := metric.Validation; checkCounts {
+		fmt.Printf("Looking at metric %v\n", metric)
+		cleanMetricName := strings.ReplaceAll(metric.ID, "(", "")
+		cleanMetricName = strings.ReplaceAll(cleanMetricName, ")", "")
+		// fmt.Printf("Clean name is: %v\n", cleanMetricName)
+
+		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Value
+		previousMetricValues := metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Value
+
+		switch checkCounts := metric.ValidationMethod; checkCounts {
 		case "static":
-			response, err := metrics.CheckStaticThreshold(metricsResponse)
+			// fmt.Println("Static check")
+			response, err := metrics.CheckStaticThreshold(currentMetricValues, metric.StaticThreshold)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v\n", err)
 				fmt.Printf(degradationText)
@@ -66,7 +79,8 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 			}
 			successText += response
 		default:
-			response, err := metrics.CompareMetrics(metricsResponse)
+			// fmt.Println("Default check")
+			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v\n", err)
 				fmt.Printf(degradationText)
