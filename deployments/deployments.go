@@ -44,7 +44,7 @@ func GetDeploymentTimestamps(config datatypes.Config, ps datatypes.PerformanceSi
 	// Check the status code
 	if r.StatusCode != 200 {
 		fmt.Printf("Invalid status code from Dynatrace: %v.\n", r.StatusCode)
-		return make([]datatypes.Timestamps, 0), fmt.Errorf("Invalid status code from Dynatrace: %v - ", r.StatusCode)
+		return make([]datatypes.Timestamps, 0), fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 
 	// Read in the body
