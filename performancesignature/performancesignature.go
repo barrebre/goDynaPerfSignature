@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"barrebre/goDynaPerfSignature/datatypes"
-	"barrebre/goDynaPerfSignature/deployments"
 	"barrebre/goDynaPerfSignature/metrics"
 
 	"github.com/davecgh/go-spew/spew"
@@ -35,12 +34,26 @@ func ReadAndValidateParams(b []byte) (datatypes.PerformanceSignature, error) {
 }
 
 // ProcessRequest handles requests we receive to /performanceSignature
-func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Config, ps datatypes.PerformanceSignature, req http.Request) (string, int, error) {
-	// Query Dt for events
-	timestamps, err := deployments.GetDeploymentTimestamps(config, ps)
+func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Config, ps datatypes.PerformanceSignature) (string, int, error) {
+	// Build the HTTP request object with query for deployments
+	req, err := buildDeploymentRequest(config, ps.ServiceID, ps.APIToken)
+	if err != nil {
+		fmt.Printf("Error building deployment request: %v.\n", err)
+		return "", 503, fmt.Errorf("Error building deployment request: %v", err)
+	}
+
+	// Query Dt for events on the given service
+	deploymentEvents, err := getDeploymentEvents(config, ps, *req)
 	if err != nil {
 		fmt.Printf("Encountered error gathering event timestamps: %v\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
+	}
+
+	// Parse those events to determine when the timestamps we should inspect are
+	timestamps, err := parseDeploymentTimestamps(deploymentEvents)
+	if err != nil {
+		fmt.Printf("Error parsing deployment timestamps: %v\n.", err)
+		return "", 503, fmt.Errorf("Error parsing deployment timestamps: %v", err)
 	}
 
 	// will be used in future for info logging
@@ -55,6 +68,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	// will be used in future for debug logging
 	// fmt.Printf("Found metrics:\n%v\n", metricsResponse)
 
+	// Ensure the gathered metrics are within the expected perfSignature
 	successText, responseCode, err := checkPerfSignature(ps, metricsResponse)
 	if err != nil {
 		fmt.Printf("Error occurred when checking performance signature: %v", err)
@@ -62,6 +76,31 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	}
 
 	return successText, 0, nil
+}
+
+// Builds the request for getting Deployments from Dynatrace
+func buildDeploymentRequest(conf datatypes.Config, serviceID string, APIToken string) (*http.Request, error) {
+	// Build the URL
+	var url string
+
+	if conf.Env == "" {
+		url = fmt.Sprintf("https://%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", conf.Server, serviceID)
+	} else {
+		url = fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", conf.Server, conf.Env, serviceID)
+	}
+	// fmt.Printf("Made URL: %v\n", url)
+
+	// Build the request object
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Printf("Error creating request handler: %v", err)
+		return &http.Request{}, err
+	}
+
+	apiTokenField := fmt.Sprintf("Api-Token %v", APIToken)
+	req.Header.Add("Authorization", apiTokenField)
+
+	return req, nil
 }
 
 // Check the required body params sent in with the request to ensure we have all the data we need to query Dt
