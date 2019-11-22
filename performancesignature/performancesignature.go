@@ -14,13 +14,13 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-// ProcessRequest handles requests we receive to /performanceSignature
-func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Config, b []byte) (string, int, error) {
+// ReadAndValidateParams validates the body params sent in the request from the user
+func ReadAndValidateParams(b []byte) (datatypes.PerformanceSignature, error) {
 	// Read POST body params
 	var performanceSignature datatypes.PerformanceSignature
 	err := json.Unmarshal(b, &performanceSignature)
 	if err != nil {
-		return "", 400, err
+		return datatypes.PerformanceSignature{}, err
 	}
 	// fmt.Printf("Received params: %v\n", spew.Sdump(performanceSignature))
 
@@ -28,11 +28,16 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	err = checkParams(performanceSignature)
 	if err != nil {
 		fmt.Println("Encountered error at check params", err)
-		return "", 400, err
+		return datatypes.PerformanceSignature{}, err
 	}
 
+	return performanceSignature, nil
+}
+
+// ProcessRequest handles requests we receive to /performanceSignature
+func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Config, ps datatypes.PerformanceSignature, req http.Request) (string, int, error) {
 	// Query Dt for events
-	timestamps, err := deployments.GetDeploymentTimestamps(config, performanceSignature)
+	timestamps, err := deployments.GetDeploymentTimestamps(config, ps)
 	if err != nil {
 		fmt.Printf("Encountered error gathering event timestamps: %v\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
@@ -42,7 +47,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	// printDeploymentTimestamps(timestamps)
 
 	// Get the requested metrics for the discovered timestamp(s)
-	metricsResponse, err := metrics.GetMetrics(config, performanceSignature, timestamps)
+	metricsResponse, err := metrics.GetMetrics(config, ps, timestamps)
 	if err != nil {
 		fmt.Printf("Encountered error gathering metrics: %v\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering metrics: %v", err)
@@ -50,7 +55,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	// will be used in future for debug logging
 	// fmt.Printf("Found metrics:\n%v\n", metricsResponse)
 
-	successText, responseCode, err := checkPerfSignature(performanceSignature, metricsResponse)
+	successText, responseCode, err := checkPerfSignature(ps, metricsResponse)
 	if err != nil {
 		fmt.Printf("Error occurred when checking performance signature: %v", err)
 		return "", responseCode, fmt.Errorf("Error occurred when checking performance signature: %v", err)

@@ -78,12 +78,37 @@ func TestCheckParams(t *testing.T) {
 }
 
 func TestPrintDeploymentTimestamps(t *testing.T) {
-	singleTimestamp := []datatypes.Timestamps{
-		datatypes.Timestamps{
-			StartTime: 1574416227,
-			EndTime:   1574419827,
+	type testDefs struct {
+		Name   string
+		Values []datatypes.Timestamps
+	}
+
+	tests := []testDefs{
+		testDefs{
+			Name: "One previous deployment",
+			Values: []datatypes.Timestamps{
+				datatypes.Timestamps{
+					StartTime: 1574416227,
+					EndTime:   1574419827,
+				},
+			},
+		},
+		testDefs{
+			Name: "Two previous deployments",
+			Values: []datatypes.Timestamps{
+				datatypes.Timestamps{
+					StartTime: 1574416227,
+					EndTime:   1574419827,
+				},
+				datatypes.Timestamps{
+					StartTime: 1574416227,
+					EndTime:   1574419827,
+				},
+			},
 		},
 	}
 
-	printDeploymentTimestamps(singleTimestamp)
+	for _, test := range tests {
+		printDeploymentTimestamps(test.Values)
+	}
 }
