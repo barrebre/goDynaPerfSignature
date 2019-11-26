@@ -21,7 +21,6 @@ func ReadAndValidateParams(b []byte) (datatypes.PerformanceSignature, error) {
 	if err != nil {
 		return datatypes.PerformanceSignature{}, err
 	}
-	// fmt.Printf("Received params: %v\n", spew.Sdump(performanceSignature))
 
 	// Verify all necessary params were sent
 	err = checkParams(performanceSignature)
@@ -31,6 +30,23 @@ func ReadAndValidateParams(b []byte) (datatypes.PerformanceSignature, error) {
 	}
 
 	return performanceSignature, nil
+}
+
+// Check the required body params sent in with the request to ensure we have all the data we need to query Dt
+func checkParams(p datatypes.PerformanceSignature) error {
+	if p.APIToken == "" {
+		return fmt.Errorf("No API Token found in object: %v", spew.Sdump(p))
+	}
+
+	if len(p.Metrics) == 0 {
+		return fmt.Errorf("No MetricIDs found in object: %v", spew.Sdump(p))
+	}
+
+	if p.ServiceID == "" {
+		return fmt.Errorf("No Services found in object: %v", spew.Sdump(p))
+	}
+
+	return nil
 }
 
 // ProcessRequest handles requests we receive to /performanceSignature
@@ -88,7 +104,6 @@ func buildDeploymentRequest(conf datatypes.Config, serviceID string, APIToken st
 	} else {
 		url = fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", conf.Server, conf.Env, serviceID)
 	}
-	// fmt.Printf("Made URL: %v\n", url)
 
 	// Build the request object
 	req, err := http.NewRequest("GET", url, nil)
@@ -97,27 +112,11 @@ func buildDeploymentRequest(conf datatypes.Config, serviceID string, APIToken st
 		return &http.Request{}, err
 	}
 
+	// Add the API token
 	apiTokenField := fmt.Sprintf("Api-Token %v", APIToken)
 	req.Header.Add("Authorization", apiTokenField)
 
 	return req, nil
-}
-
-// Check the required body params sent in with the request to ensure we have all the data we need to query Dt
-func checkParams(p datatypes.PerformanceSignature) error {
-	if p.APIToken == "" {
-		return fmt.Errorf("No API Token found in object: %v", spew.Sdump(p))
-	}
-
-	if len(p.Metrics) == 0 {
-		return fmt.Errorf("No MetricIDs found in object: %v", spew.Sdump(p))
-	}
-
-	if p.ServiceID == "" {
-		return fmt.Errorf("No Services found in object: %v", spew.Sdump(p))
-	}
-
-	return nil
 }
 
 func printDeploymentTimestamps(timestamps []datatypes.Timestamps) {
