@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"barrebre/goDynaPerfSignature/datatypes"
-	"barrebre/goDynaPerfSignature/metrics"
+	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/metrics"
 
 	"github.com/davecgh/go-spew/spew"
 )

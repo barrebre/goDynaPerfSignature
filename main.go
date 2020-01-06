@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"time"
 
-	"barrebre/goDynaPerfSignature/datatypes"
-	"barrebre/goDynaPerfSignature/performancesignature"
-	"barrebre/goDynaPerfSignature/utils"
+	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/performancesignature"
+	"github.com/barrebre/goDynaPerfSignature/utils"
 
 	"github.com/gorilla/mux"
 )
