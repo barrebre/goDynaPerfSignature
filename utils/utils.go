@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"barrebre/goDynaPerfSignature/datatypes"
+	"goDynaPerfSignature/datatypes"
 )
 
 // GetConfig retrives the config from the env

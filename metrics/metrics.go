@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 
-	"barrebre/goDynaPerfSignature/datatypes"
+	"goDynaPerfSignature/datatypes"
 )
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace

@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"time"
 
-	"barrebre/goDynaPerfSignature/datatypes"
-	"barrebre/goDynaPerfSignature/performancesignature"
-	"barrebre/goDynaPerfSignature/utils"
+	"goDynaPerfSignature/datatypes"
+	"goDynaPerfSignature/performancesignature"
+	"goDynaPerfSignature/utils"
 
 	"github.com/gorilla/mux"
 )

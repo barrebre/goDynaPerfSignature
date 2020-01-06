@@ -3,7 +3,7 @@ package performancesignature
 import (
 	"testing"
 
-	"barrebre/goDynaPerfSignature/datatypes"
+	"goDynaPerfSignature/datatypes"
 
 	"github.com/stretchr/testify/assert"
 )

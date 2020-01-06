@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"barrebre/goDynaPerfSignature/datatypes"
+	"goDynaPerfSignature/datatypes"
 )
 
 // Gets the deployment events from Dynatrace
