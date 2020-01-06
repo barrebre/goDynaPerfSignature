@@ -10,9 +10,9 @@ import (
 	"os/signal"
 	"time"
 
-	"barrebre/goDynaPerfSignature/datatypes"
-	"barrebre/goDynaPerfSignature/performancesignature"
-	"barrebre/goDynaPerfSignature/utils"
+	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/performancesignature"
+	"github.com/barrebre/goDynaPerfSignature/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -35,14 +35,21 @@ func main() {
 	r.HandleFunc("/performanceSignature", func(w http.ResponseWriter, r *http.Request) {
 		b, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
-
 		if err != nil {
 			utils.WriteResponse(w, r, "", err, 400)
 		}
 
+		// for future use with debug logging
 		// fmt.Printf("Received request: %v\n", string(b))
 
-		responseText, errCode, err := performancesignature.ProcessRequest(w, r, config, b)
+		// Pull out and verify the provided params
+		ps, err := performancesignature.ReadAndValidateParams(b)
+		if err != nil {
+			utils.WriteResponse(w, r, "", err, 400)
+		}
+
+		// Perform the performance signature
+		responseText, errCode, err := performancesignature.ProcessRequest(w, r, config, ps)
 		if err != nil {
 			utils.WriteResponse(w, r, "", err, errCode)
 		}
