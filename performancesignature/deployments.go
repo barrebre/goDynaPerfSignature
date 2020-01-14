@@ -48,7 +48,7 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents) ([]datatypes.Timest
 	// If there are no deployment events previously, we can still perform static checks
 	case 0:
 		fmt.Println("There haven't been enough deployment events. Auto-passing")
-		return []datatypes.Timestamps{}, fmt.Errorf("No deployment events found")
+		return []datatypes.Timestamps{}, nil
 	// If there is only one deployment event, we can still perform static checks
 	case 1:
 		var deploymentTimestamp = []datatypes.Timestamps{
