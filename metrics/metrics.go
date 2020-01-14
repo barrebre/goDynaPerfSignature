@@ -135,7 +135,7 @@ func CompareMetrics(curr float64, prev float64) (string, error) {
 
 	if delta > 0 {
 		errorMessage := fmt.Sprintf("The metric had a degradation from %v to %v", prev, curr)
-		return errorMessage, fmt.Errorf("Error rate increase of %v%%", delta)
+		return errorMessage, fmt.Errorf("Degredation of %v%%", delta)
 	}
 
 	successResponse := fmt.Sprintf("Successful deploy! Improvement by %v.\n", math.Abs(delta))

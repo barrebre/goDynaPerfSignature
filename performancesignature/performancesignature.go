@@ -72,6 +72,10 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 		return "", 503, fmt.Errorf("Error parsing deployment timestamps: %v", err)
 	}
 
+	if len(timestamps) == 0 {
+		return "No deployment events found. Automatic pass\n", 200, nil
+	}
+
 	// will be used in future for info logging
 	// printDeploymentTimestamps(timestamps)
 
@@ -149,10 +153,12 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 
 		// This is only an issue if trying a comparison
 		canCompare := true
+		var previousMetricValues float64
 		if len(metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
 			canCompare = false
+		} else {
+			previousMetricValues = metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Value
 		}
-		previousMetricValues := metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Value
 
 		switch checkCounts := metric.ValidationMethod; checkCounts {
 		case "static":
