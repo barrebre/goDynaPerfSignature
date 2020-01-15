@@ -59,7 +59,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	}
 
 	// Query Dt for events on the given service
-	deploymentEvents, err := getDeploymentEvents(config, ps, *req)
+	deploymentEvents, err := getDeploymentEvents(*req)
 	if err != nil {
 		fmt.Printf("Encountered error gathering event timestamps: %v\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
@@ -75,9 +75,6 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	if len(timestamps) == 0 {
 		return "No deployment events found. Automatic pass\n", 200, nil
 	}
-
-	// will be used in future for info logging
-	// printDeploymentTimestamps(timestamps)
 
 	// Get the requested metrics for the discovered timestamp(s)
 	metricsResponse, err := metrics.GetMetrics(config, ps, timestamps)

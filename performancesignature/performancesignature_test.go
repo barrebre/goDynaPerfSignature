@@ -67,7 +67,6 @@ func TestBuildDeploymentRequest(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestCheckParams(t *testing.T) {

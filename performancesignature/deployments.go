@@ -11,7 +11,7 @@ import (
 )
 
 // Gets the deployment events from Dynatrace
-func getDeploymentEvents(config datatypes.Config, ps datatypes.PerformanceSignature, req http.Request) (datatypes.DeploymentEvents, error) {
+func getDeploymentEvents(req http.Request) (datatypes.DeploymentEvents, error) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
@@ -44,13 +44,14 @@ func getDeploymentEvents(config datatypes.Config, ps datatypes.PerformanceSignat
 
 // Parses Dynatrace Deployment Events for their timestamps
 func parseDeploymentTimestamps(d datatypes.DeploymentEvents) ([]datatypes.Timestamps, error) {
-	switch deploymentCount := len(d.Events); deploymentCount {
+	eventsFound := len(d.Events)
+
 	// If there are no deployment events previously, we can still perform static checks
-	case 0:
+	if eventsFound == 0 {
 		fmt.Println("There haven't been enough deployment events. Auto-passing")
 		return []datatypes.Timestamps{}, nil
-	// If there is only one deployment event, we can still perform static checks
-	case 1:
+		// If there is only one deployment event, we can still perform static checks
+	} else if eventsFound == 1 {
 		var deploymentTimestamp = []datatypes.Timestamps{
 			datatypes.Timestamps{
 				StartTime: d.Events[0].StartTime,
@@ -58,8 +59,8 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents) ([]datatypes.Timest
 			},
 		}
 		return deploymentTimestamp, nil
-	// If there are two deployment events, we can perform all types of checks
-	case 2:
+		// If there are two deployment events, we can perform all types of checks
+	} else if eventsFound >= 2 {
 		var deploymentTimestamps = []datatypes.Timestamps{
 			datatypes.Timestamps{
 				StartTime: d.Events[0].StartTime,
