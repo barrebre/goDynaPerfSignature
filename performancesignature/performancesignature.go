@@ -14,7 +14,7 @@ import (
 )
 
 // ReadAndValidateParams validates the body params sent in the request from the user
-func ReadAndValidateParams(b []byte) (datatypes.PerformanceSignature, error) {
+func ReadAndValidateParams(b []byte, config datatypes.Config) (datatypes.PerformanceSignature, error) {
 	// Read POST body params
 	var performanceSignature datatypes.PerformanceSignature
 	err := json.Unmarshal(b, &performanceSignature)
@@ -23,36 +23,48 @@ func ReadAndValidateParams(b []byte) (datatypes.PerformanceSignature, error) {
 	}
 
 	// Verify all necessary params were sent
-	err = checkParams(performanceSignature)
+	updatedPerformanceSignature, err := checkParams(performanceSignature, config)
 	if err != nil {
 		fmt.Println("Encountered error at check params", err)
 		return datatypes.PerformanceSignature{}, err
 	}
 
-	return performanceSignature, nil
+	return updatedPerformanceSignature, nil
 }
 
 // Check the required body params sent in with the request to ensure we have all the data we need to query Dt
-func checkParams(p datatypes.PerformanceSignature) error {
+func checkParams(p datatypes.PerformanceSignature, config datatypes.Config) (datatypes.PerformanceSignature, error) {
 	if p.APIToken == "" {
-		return fmt.Errorf("No API Token found in object: %v", spew.Sdump(p))
+		return datatypes.PerformanceSignature{}, fmt.Errorf("No API Token found in object: %v", spew.Sdump(p))
 	}
 
 	if len(p.Metrics) == 0 {
-		return fmt.Errorf("No MetricIDs found in object: %v", spew.Sdump(p))
+		return datatypes.PerformanceSignature{}, fmt.Errorf("No MetricIDs found in object: %v", spew.Sdump(p))
 	}
 
 	if p.ServiceID == "" {
-		return fmt.Errorf("No Services found in object: %v", spew.Sdump(p))
+		return datatypes.PerformanceSignature{}, fmt.Errorf("No Services found in object: %v", spew.Sdump(p))
 	}
 
-	return nil
+	// If there was no server called out
+	if p.DTServer == "" {
+		// And there's no default config
+		if config.Server == "" {
+			return datatypes.PerformanceSignature{}, fmt.Errorf("There is no default server configured and no server was passed with the POST: %v", spew.Sdump(p))
+		}
+
+		p.DTServer = config.Server
+		p.DTEnv = config.Env
+		return p, nil
+	}
+
+	return p, nil
 }
 
 // ProcessRequest handles requests we receive to /performanceSignature
-func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Config, ps datatypes.PerformanceSignature) (string, int, error) {
+func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.PerformanceSignature) (string, int, error) {
 	// Build the HTTP request object with query for deployments
-	req, err := buildDeploymentRequest(config, ps.ServiceID, ps.APIToken)
+	req, err := buildDeploymentRequest(ps)
 	if err != nil {
 		fmt.Printf("Error building deployment request: %v.\n", err)
 		return "", 503, fmt.Errorf("Error building deployment request: %v", err)
@@ -77,7 +89,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 	}
 
 	// Get the requested metrics for the discovered timestamp(s)
-	metricsResponse, err := metrics.GetMetrics(config, ps, timestamps)
+	metricsResponse, err := metrics.GetMetrics(ps, timestamps)
 	if err != nil {
 		fmt.Printf("Encountered error gathering metrics: %v\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering metrics: %v", err)
@@ -96,14 +108,14 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, config datatypes.Con
 }
 
 // Builds the request for getting Deployments from Dynatrace
-func buildDeploymentRequest(conf datatypes.Config, serviceID string, APIToken string) (*http.Request, error) {
+func buildDeploymentRequest(ps datatypes.PerformanceSignature) (*http.Request, error) {
 	// Build the URL
 	var url string
 
-	if conf.Env == "" {
-		url = fmt.Sprintf("https://%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", conf.Server, serviceID)
+	if ps.DTEnv == "" {
+		url = fmt.Sprintf("https://%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", ps.DTServer, ps.ServiceID)
 	} else {
-		url = fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", conf.Server, conf.Env, serviceID)
+		url = fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", ps.DTServer, ps.DTEnv, ps.ServiceID)
 	}
 
 	// Build the request object
@@ -114,7 +126,7 @@ func buildDeploymentRequest(conf datatypes.Config, serviceID string, APIToken st
 	}
 
 	// Add the API token
-	apiTokenField := fmt.Sprintf("Api-Token %v", APIToken)
+	apiTokenField := fmt.Sprintf("Api-Token %v", ps.APIToken)
 	req.Header.Add("Authorization", apiTokenField)
 
 	return req, nil

@@ -44,18 +44,6 @@ func TestGetConfig(t *testing.T) {
 				DtServerSet: false,
 				DtEnvSet:    false,
 			},
-			ExpectPass:    false,
-			ExpectedError: "Error finding the DT_SERVER in the env",
-		},
-		testDefs{
-			Name: "Env variables not set",
-			Values: values{
-				Config: datatypes.Config{
-					Env: "abcd1234",
-				},
-				DtServerSet: true,
-				DtEnvSet:    false,
-			},
 			ExpectPass: true,
 		},
 	}
