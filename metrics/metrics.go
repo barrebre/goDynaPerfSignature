@@ -39,7 +39,7 @@ func CompareMetrics(curr float64, prev float64) (string, error) {
 }
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
-func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (datatypes.ComparisonMetrics, error) {
+func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (datatypes.ComparisonMetrics, error) {
 	// Transform the POSTed metrics into escaped strings
 	metricNames := ""
 	for _, metric := range ps.Metrics {
@@ -48,14 +48,14 @@ func GetMetrics(config datatypes.Config, ps datatypes.PerformanceSignature, ts [
 	safeMetricNames := url.QueryEscape(metricNames)
 
 	// Get the metrics from the most recent Deployment Event
-	metricResponse, err := queryMetrics(config.Server, config.Env, safeMetricNames, ts[0], ps)
+	metricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, safeMetricNames, ts[0], ps)
 	if err != nil {
 		return datatypes.ComparisonMetrics{}, fmt.Errorf("Error querying current metrics from Dynatrace: %v", err)
 	}
 
 	// If there were two Deployment Events, get the second set of metrics
 	if len(ts) == 2 {
-		previousMetricResponse, err := queryMetrics(config.Server, config.Env, safeMetricNames, ts[1], ps)
+		previousMetricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, safeMetricNames, ts[1], ps)
 		if err != nil {
 			return datatypes.ComparisonMetrics{}, fmt.Errorf("Error querying previous metrics from Dynatrace: %v", err)
 		}

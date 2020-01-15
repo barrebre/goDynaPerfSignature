@@ -12,15 +12,16 @@ import (
 func GetConfig() (datatypes.Config, error) {
 	server := os.Getenv("DT_SERVER")
 	if server == "" {
-		return datatypes.Config{}, fmt.Errorf("Error finding the DT_SERVER in the env")
+		fmt.Printf("A Dynatrace server was not provided. Requests will not work unless a DT_SERVER is given in the POST body.\n")
+	} else {
+		fmt.Printf("Loaded default Dynatrace Server: %v. This can be overridden with any API POST.\n", server)
 	}
-	fmt.Printf("Successfully loaded DT_SERVER: %v.\n", server)
 
 	env := os.Getenv("DT_ENV")
 	if env == "" {
 		fmt.Printf("A Dynatrace environment was not provided. If your tenant has multiple environments, you will need to include this.\n")
 	} else {
-		fmt.Printf("Successfully loaded DT_ENV: %v.\n", env)
+		fmt.Printf("Loaded default Dynatrace Env: %v. This can be overridden with any API POST.\n", env)
 	}
 
 	config := datatypes.Config{

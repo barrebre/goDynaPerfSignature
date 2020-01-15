@@ -39,17 +39,14 @@ func main() {
 			utils.WriteResponse(w, r, "", err, 400)
 		}
 
-		// for future use with debug logging
-		// fmt.Printf("Received request: %v\n", string(b))
-
 		// Pull out and verify the provided params
-		ps, err := performancesignature.ReadAndValidateParams(b)
+		ps, err := performancesignature.ReadAndValidateParams(b, config)
 		if err != nil {
 			utils.WriteResponse(w, r, "", err, 400)
 		}
 
 		// Perform the performance signature
-		responseText, errCode, err := performancesignature.ProcessRequest(w, r, config, ps)
+		responseText, errCode, err := performancesignature.ProcessRequest(w, r, ps)
 		if err != nil {
 			utils.WriteResponse(w, r, "", err, errCode)
 		}
