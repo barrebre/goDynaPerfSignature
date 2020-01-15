@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
-	"github.com/barrebre/goDynaPerfSignature/exampletestdata"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -152,50 +151,50 @@ func TestCheckPerfSignature(t *testing.T) {
 	tests := []testDefs{
 		testDefs{
 			Name:            "Valid Default Check Failing Data",
-			PerfSignature:   exampletestdata.GetValidDefaultPerformanceSignature(),
-			MetricsResponse: exampletestdata.GetValidFailingComparisonMetrics(),
+			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
+			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
 			ExpectedError:   "",
 		},
 		testDefs{
 			Name:            "Valid Static Check Failing Data",
-			PerfSignature:   exampletestdata.GetValidStaticPerformanceSignature(),
-			MetricsResponse: exampletestdata.GetValidFailingComparisonMetrics(),
+			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
+			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
 			ExpectedError:   "",
 		},
 		testDefs{
 			Name:            "Valid Default Check Passing Data",
-			PerfSignature:   exampletestdata.GetValidDefaultPerformanceSignature(),
-			MetricsResponse: exampletestdata.GetValidPassingComparisonMetrics(),
+			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
+			MetricsResponse: datatypes.GetValidPassingComparisonMetrics(),
 			ExpectPass:      true,
 			ExpectedError:   "",
 		},
 		testDefs{
 			Name:            "Valid Default Check Passing Data",
-			PerfSignature:   exampletestdata.GetValidDefaultPerformanceSignature(),
-			MetricsResponse: exampletestdata.GetValidPassingComparisonMetrics(),
+			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
+			MetricsResponse: datatypes.GetValidPassingComparisonMetrics(),
 			ExpectPass:      true,
 			ExpectedError:   "",
 		},
 		testDefs{
 			Name:            "No Data Returned",
-			PerfSignature:   exampletestdata.GetValidStaticPerformanceSignature(),
-			MetricsResponse: exampletestdata.GetMissingComparisonMetrics(),
+			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
+			MetricsResponse: datatypes.GetMissingComparisonMetrics(),
 			ExpectPass:      false,
 			ExpectedError:   "",
 		},
 		testDefs{
 			Name:            "No Previous Deployment Data Returned - Default Check",
-			PerfSignature:   exampletestdata.GetValidDefaultPerformanceSignature(),
-			MetricsResponse: exampletestdata.GetMissingPreviousComparisonMetrics(),
+			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
+			MetricsResponse: datatypes.GetMissingPreviousComparisonMetrics(),
 			ExpectPass:      false,
 			ExpectedError:   "",
 		},
 		testDefs{
 			Name:            "No Previous Deployment Data Returned - Static Check",
-			PerfSignature:   exampletestdata.GetValidStaticPerformanceSignature(),
-			MetricsResponse: exampletestdata.GetMissingPreviousComparisonMetrics(),
+			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
+			MetricsResponse: datatypes.GetMissingPreviousComparisonMetrics(),
 			ExpectPass:      true,
 			ExpectedError:   "",
 		},
