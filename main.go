@@ -79,6 +79,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 	srv.Shutdown(ctx)
-	log.Println("shutting down")
+	log.Println("\nShutting down goDynaPerfSignature.")
 	os.Exit(0)
 }
