@@ -12,8 +12,8 @@ docker run -expose -p 8080:8080 --name go-dyna-perf-signature barrebre/go-dyna-p
 
 ### Optional Environment Variables
 Here are some environment variables you may want to consider setting:
-* **DT_ENV** - The Dynatrace environment to point to, if your tenant has multiple environments
-* **DT_SERVER** - The Dynatrace Server to point to (FQDN)
+* **DT_ENV** - The Dynatrace environment to point to. Use this only if your tenant has multiple environments. *Ex*:`1j23ifj1203fj01923j0`
+* **DT_SERVER** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`
 
 If you would like to set the DT_ENV or DT_SERVER, you can edit the `docker_env` file and then run
 ```
