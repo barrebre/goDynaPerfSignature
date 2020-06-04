@@ -177,7 +177,7 @@ func TestReadAndValidateParams(t *testing.T) {
 				Config:    datatypes.Config{},
 			},
 			ExpectPass:    false,
-			ExpectedError: "There is no default server configured and no server was passed with the POST: (datatypes.PerformanceSignature) {\n APIToken: (string) (len=21) \"S2pMHW_FSlma-PPJIj3l5\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n Metrics: ([]datatypes.Metric) (len=2 cap=4) {\n  (datatypes.Metric) {\n   ID: (string) (len=35) \"builtin:service.response.time:(avg)\",\n   StaticThreshold: (float64) 0,\n   ValidationMethod: (string) \"\"\n  },\n  (datatypes.Metric) {\n   ID: (string) (len=39) \"builtin:service.errors.total.rate:(avg)\",\n   StaticThreshold: (float64) 1,\n   ValidationMethod: (string) (len=6) \"static\"\n  }\n },\n ServiceID: (string) (len=24) \"SERVICE-5D4E743B2BF0CCF5\"\n}\n",
+			ExpectedError: "There is no default server configured and no server was passed with the POST: (datatypes.PerformanceSignature) {\n APIToken: (string) (len=21) \"S2pMHW_FSlma-PPJIj3l5\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n EvaluationMins: (int) 0,\n Metrics: ([]datatypes.Metric) (len=2 cap=4) {\n  (datatypes.Metric) {\n   ID: (string) (len=35) \"builtin:service.response.time:(avg)\",\n   StaticThreshold: (float64) 0,\n   ValidationMethod: (string) \"\"\n  },\n  (datatypes.Metric) {\n   ID: (string) (len=39) \"builtin:service.errors.total.rate:(avg)\",\n   StaticThreshold: (float64) 1,\n   ValidationMethod: (string) (len=6) \"static\"\n  }\n },\n ServiceID: (string) (len=24) \"SERVICE-5D4E743B2BF0CCF5\"\n}\n",
 		},
 		testDefs{
 			Name: "Fail - no metrics provided",
@@ -186,7 +186,7 @@ func TestReadAndValidateParams(t *testing.T) {
 				Config:    datatypes.Config{},
 			},
 			ExpectPass:    false,
-			ExpectedError: "No MetricIDs found in object: (datatypes.PerformanceSignature) {\n APIToken: (string) (len=21) \"S2pMHW_FSlma-PPJIj3l5\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n Metrics: ([]datatypes.Metric) <nil>,\n ServiceID: (string) (len=24) \"SERVICE-5D4E743B2BF0CCF5\"\n}\n",
+			ExpectedError: "No MetricIDs found in object: (datatypes.PerformanceSignature) {\n APIToken: (string) (len=21) \"S2pMHW_FSlma-PPJIj3l5\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n EvaluationMins: (int) 0,\n Metrics: ([]datatypes.Metric) <nil>,\n ServiceID: (string) (len=24) \"SERVICE-5D4E743B2BF0CCF5\"\n}\n",
 		},
 		testDefs{
 			Name: "Fail - no services provided",
@@ -195,7 +195,7 @@ func TestReadAndValidateParams(t *testing.T) {
 				Config:    datatypes.Config{},
 			},
 			ExpectPass:    false,
-			ExpectedError: "No Services found in object: (datatypes.PerformanceSignature) {\n APIToken: (string) (len=21) \"S2pMHW_FSlma-PPJIj3l5\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n Metrics: ([]datatypes.Metric) (len=2 cap=4) {\n  (datatypes.Metric) {\n   ID: (string) (len=35) \"builtin:service.response.time:(avg)\",\n   StaticThreshold: (float64) 0,\n   ValidationMethod: (string) \"\"\n  },\n  (datatypes.Metric) {\n   ID: (string) (len=39) \"builtin:service.errors.total.rate:(avg)\",\n   StaticThreshold: (float64) 1,\n   ValidationMethod: (string) (len=6) \"static\"\n  }\n },\n ServiceID: (string) \"\"\n}\n",
+			ExpectedError: "No Services found in object: (datatypes.PerformanceSignature) {\n APIToken: (string) (len=21) \"S2pMHW_FSlma-PPJIj3l5\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n EvaluationMins: (int) 0,\n Metrics: ([]datatypes.Metric) (len=2 cap=4) {\n  (datatypes.Metric) {\n   ID: (string) (len=35) \"builtin:service.response.time:(avg)\",\n   StaticThreshold: (float64) 0,\n   ValidationMethod: (string) \"\"\n  },\n  (datatypes.Metric) {\n   ID: (string) (len=39) \"builtin:service.errors.total.rate:(avg)\",\n   StaticThreshold: (float64) 1,\n   ValidationMethod: (string) (len=6) \"static\"\n  }\n },\n ServiceID: (string) \"\"\n}\n",
 		},
 		testDefs{
 			Name: "Fail - invalid JSON",
@@ -211,7 +211,7 @@ func TestReadAndValidateParams(t *testing.T) {
 				APIString: []byte(invalidJSONstring),
 			},
 			ExpectPass:    false,
-			ExpectedError: "No API Token found in object: (datatypes.PerformanceSignature) {\n APIToken: (string) \"\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n Metrics: ([]datatypes.Metric) (len=2 cap=4) {\n  (datatypes.Metric) {\n   ID: (string) (len=35) \"builtin:service.response.time:(avg)\",\n   StaticThreshold: (float64) 0,\n   ValidationMethod: (string) \"\"\n  },\n  (datatypes.Metric) {\n   ID: (string) (len=39) \"builtin:service.errors.total.rate:(avg)\",\n   StaticThreshold: (float64) 1,\n   ValidationMethod: (string) (len=6) \"static\"\n  }\n },\n ServiceID: (string) (len=24) \"SERVICE-5D4E743B2BF0CCF5\"\n}\n",
+			ExpectedError: "No API Token found in object: (datatypes.PerformanceSignature) {\n APIToken: (string) \"\",\n DTEnv: (string) \"\",\n DTServer: (string) \"\",\n EvaluationMins: (int) 0,\n Metrics: ([]datatypes.Metric) (len=2 cap=4) {\n  (datatypes.Metric) {\n   ID: (string) (len=35) \"builtin:service.response.time:(avg)\",\n   StaticThreshold: (float64) 0,\n   ValidationMethod: (string) \"\"\n  },\n  (datatypes.Metric) {\n   ID: (string) (len=39) \"builtin:service.errors.total.rate:(avg)\",\n   StaticThreshold: (float64) 1,\n   ValidationMethod: (string) (len=6) \"static\"\n  }\n },\n ServiceID: (string) (len=24) \"SERVICE-5D4E743B2BF0CCF5\"\n}\n",
 		},
 	}
 

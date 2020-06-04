@@ -41,6 +41,7 @@ Once you have an instance of the application running, you'll want to make calls 
 ## Optional Parameters
 * **DTEnv** - The Dynatrace environment to point to. Use this only if your tenant has multiple environments. *Ex*:`1j23ifj1203fj01923j0`
 * **DTServer** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`
+* **EvaluationMins** - If you would rather provide an evaluation timeframe than use the duration of Deployment Events, provide a number of minutes in this field. *Ex*: `5`
 
 ## Example
 From another terminal, you can make requests to the app via a curl like this one:

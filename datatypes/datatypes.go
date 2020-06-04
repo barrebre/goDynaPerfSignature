@@ -11,17 +11,19 @@ type Metric struct {
 
 // PerformanceSignature is a struct defining all of the parameters we need to calculate a performance signature
 type PerformanceSignature struct {
-	APIToken  string
-	DTEnv     string
-	DTServer  string
-	Metrics   []Metric
-	ServiceID string
+	APIToken       string
+	DTEnv          string
+	DTServer       string
+	EvaluationMins int
+	Metrics        []Metric
+	ServiceID      string
 }
 
 //// Example Values
 var (
 	validStaticPerformanceSignature = PerformanceSignature{
-		APIToken: "asdf1234",
+		APIToken:       "asdf1234",
+		EvaluationMins: 5,
 		Metrics: []Metric{
 			Metric{
 				ID:               "TestMetric",
@@ -33,7 +35,8 @@ var (
 	}
 
 	validDefaultPerformanceSignature = PerformanceSignature{
-		APIToken: "asdf1234",
+		APIToken:       "asdf1234",
+		EvaluationMins: 5,
 		Metrics: []Metric{
 			Metric{
 				ID:              "TestMetric",

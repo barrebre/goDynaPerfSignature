@@ -78,7 +78,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	}
 
 	// Parse those events to determine when the timestamps we should inspect are
-	timestamps, err := parseDeploymentTimestamps(deploymentEvents)
+	timestamps, err := parseDeploymentTimestamps(deploymentEvents, ps.EvaluationMins)
 	if err != nil {
 		fmt.Printf("Error parsing deployment timestamps: %v\n.", err)
 		return "", 503, fmt.Errorf("Error parsing deployment timestamps: %v", err)
