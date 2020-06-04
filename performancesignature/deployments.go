@@ -43,7 +43,7 @@ func getDeploymentEvents(req http.Request) (datatypes.DeploymentEvents, error) {
 }
 
 // Parses Dynatrace Deployment Events for their timestamps
-func parseDeploymentTimestamps(d datatypes.DeploymentEvents) ([]datatypes.Timestamps, error) {
+func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]datatypes.Timestamps, error) {
 	eventsFound := len(d.Events)
 
 	// If there are no deployment events previously, we can still perform static checks
@@ -52,24 +52,54 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents) ([]datatypes.Timest
 		return []datatypes.Timestamps{}, nil
 		// If there is only one deployment event, we can still perform static checks
 	} else if eventsFound == 1 {
-		var deploymentTimestamp = []datatypes.Timestamps{
-			datatypes.Timestamps{
-				StartTime: d.Events[0].StartTime,
-				EndTime:   d.Events[0].EndTime,
-			},
+		var deploymentTimestamp []datatypes.Timestamps
+
+		// If there is no evaluation timeframe supplied
+		if mins < 1 {
+			deploymentTimestamp = []datatypes.Timestamps{
+				datatypes.Timestamps{
+					StartTime: d.Events[0].StartTime,
+					EndTime:   d.Events[0].EndTime,
+				},
+			}
+		} else {
+			microMins := int64(mins * 60000)
+			deploymentTimestamp = []datatypes.Timestamps{
+				datatypes.Timestamps{
+					StartTime: d.Events[0].StartTime,
+					EndTime:   d.Events[0].StartTime + microMins,
+				},
+			}
 		}
 		return deploymentTimestamp, nil
 		// If there are two deployment events, we can perform all types of checks
 	} else if eventsFound >= 2 {
-		var deploymentTimestamps = []datatypes.Timestamps{
-			datatypes.Timestamps{
-				StartTime: d.Events[0].StartTime,
-				EndTime:   d.Events[0].EndTime,
-			},
-			datatypes.Timestamps{
-				StartTime: d.Events[1].StartTime,
-				EndTime:   d.Events[1].EndTime,
-			},
+		var deploymentTimestamps []datatypes.Timestamps
+
+		// If there is no evaluation timeframe supplied
+		if mins < 1 {
+			deploymentTimestamps = []datatypes.Timestamps{
+				datatypes.Timestamps{
+					StartTime: d.Events[0].StartTime,
+					EndTime:   d.Events[0].EndTime,
+				},
+				datatypes.Timestamps{
+					StartTime: d.Events[1].StartTime,
+					EndTime:   d.Events[1].EndTime,
+				},
+			}
+		} else {
+			microMins := int64(mins * 60000)
+			deploymentTimestamps = []datatypes.Timestamps{
+				datatypes.Timestamps{
+					StartTime: d.Events[0].StartTime,
+					EndTime:   d.Events[0].StartTime + microMins,
+				},
+				datatypes.Timestamps{
+					StartTime: d.Events[1].StartTime,
+					EndTime:   d.Events[1].StartTime + microMins,
+				},
+			}
 		}
 		return deploymentTimestamps, nil
 	}
