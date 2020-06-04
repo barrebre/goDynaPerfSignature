@@ -63,7 +63,7 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 				},
 			}
 		} else {
-			var microMins = int64(mins * 60000)
+			microMins := int64(mins * 60000)
 			deploymentTimestamp = []datatypes.Timestamps{
 				datatypes.Timestamps{
 					StartTime: d.Events[0].StartTime,
@@ -89,7 +89,7 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 				},
 			}
 		} else {
-			var microMins = int64(mins * 60000)
+			microMins := int64(mins * 60000)
 			deploymentTimestamps = []datatypes.Timestamps{
 				datatypes.Timestamps{
 					StartTime: d.Events[0].StartTime,
