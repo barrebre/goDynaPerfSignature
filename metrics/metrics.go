@@ -101,6 +101,28 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 	return metricsResponse, nil
 }
 
+// CheckRelativeThreshold compares the metrics from the current and previous timeframe
+func CheckRelativeThreshold(curr float64, prev float64, rel float64, metric string) (string, error) {
+	delta := curr - prev
+	relDiff := delta - rel
+
+	// If the difference including the threshold is still negative, it's a failure
+	if relDiff > 0 {
+		errorMessage := fmt.Sprintf("FAIL - %v did not meet the relative threshold criteria. the current performance is %v, which is not better than the previous value of %v plus the relative threshold of %v.", metric, curr, prev, rel)
+		return errorMessage, fmt.Errorf("fail - %v degradation of %v, including (%v) relative threshold", metric, fmt.Sprintf("%.2f", delta), rel)
+	}
+
+	// If the delta is negative, that means there was a performance improvement
+	if delta > 0 {
+		successResponse := fmt.Sprintf("PASS - %v improvement by %v from %v.\n", metric, delta, prev)
+		return successResponse, nil
+	}
+
+	// Otherwise, the threshold must've allowed this to pass
+	successResponse := fmt.Sprintf("PASS - %v improvement by %v from %v. this was within the relative threshold provided (%v).\n", metric, prev, delta, rel)
+	return successResponse, nil
+}
+
 // CheckStaticThreshold compares the metrics from the current and previous timeframe
 func CheckStaticThreshold(value float64, threshold float64, metric string) (string, error) {
 	delta := value - threshold

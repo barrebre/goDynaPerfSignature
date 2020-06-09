@@ -54,6 +54,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 		return "", responseCode, fmt.Errorf("Error occurred when checking performance signature: %v", err)
 	}
 
+	log.Println(successText)
 	return successText, 0, nil
 }
 
@@ -120,13 +121,23 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 		}
 
 		switch checkCounts := metric.ValidationMethod; checkCounts {
+		case "relative":
+			// will be used in future for debug logging
+			// fmt.Println("relative check")
+			response, err := metrics.CheckRelativeThreshold(currentMetricValues, previousMetricValues, metric.RelativeThreshold, cleanMetricName)
+			if err != nil {
+				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
+				log.Println(degradationText)
+				return "", 406, fmt.Errorf(degradationText)
+			}
+			successText += response
 		case "static":
 			// will be used in future for debug logging
 			// fmt.Println("Static check")
 			response, err := metrics.CheckStaticThreshold(currentMetricValues, metric.StaticThreshold, cleanMetricName)
 			if err != nil {
-				degradationText := fmt.Sprintf("Metric degradation found: %v\n", err)
-				fmt.Printf(degradationText)
+				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
+				log.Println(degradationText)
 				return "", 406, fmt.Errorf(degradationText)
 			}
 			successText += response
@@ -138,8 +149,8 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 			}
 			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues, cleanMetricName)
 			if err != nil {
-				degradationText := fmt.Sprintf("Metric degradation found: %v\n", err)
-				fmt.Printf(degradationText)
+				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
+				log.Println(degradationText)
 				return "", 406, fmt.Errorf(degradationText)
 			}
 			successText += response
