@@ -4,15 +4,17 @@ package datatypes
 
 // Config contains the config necessary for the app to run
 type Config struct {
-	Env    string
-	Server string
+	APIToken string
+	Env      string
+	Server   string
 }
 
 //// Example Values
 var (
 	configuredConfig = Config{
-		Server: "1234.live.dynatrace.com",
-		Env:    "envSet",
+		APIToken: "aj0aw9efj0a9wejf09awejf",
+		Server:   "1234.live.dynatrace.com",
+		Env:      "envSet",
 	}
 )
 
