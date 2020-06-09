@@ -113,13 +113,13 @@ func CheckRelativeThreshold(curr float64, prev float64, rel float64, metric stri
 	}
 
 	// If the delta is negative, that means there was a performance improvement
-	if delta > 0 {
-		successResponse := fmt.Sprintf("PASS - %v improvement by %v from %v.\n", metric, delta, prev)
+	if delta < 0 {
+		successResponse := fmt.Sprintf("PASS - %v improvement to %v from %v. (Difference: %v)\n", metric, curr, prev, delta)
 		return successResponse, nil
 	}
 
 	// Otherwise, the threshold must've allowed this to pass
-	successResponse := fmt.Sprintf("PASS - %v improvement by %v from %v. this was within the relative threshold provided (%v).\n", metric, prev, delta, rel)
+	successResponse := fmt.Sprintf("PASS - %v's current value is %v, which is passable compared to the previous results (%v) plus the tolerance (%v).\n", metric, curr, prev, rel)
 	return successResponse, nil
 }
 
