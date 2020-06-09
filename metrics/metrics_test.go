@@ -26,7 +26,7 @@ func TestCheckStaticThreshold(t *testing.T) {
 				Threshold: 0.5,
 			},
 			ExpectPass:    false,
-			ExpectedError: "The metric was above the static threshold: 1, instead of a desired 0.5",
+			ExpectedError: "dummy_metric_name:(avg) was above the static threshold: 1, instead of a desired 0.5",
 		},
 		testDefs{
 			Name: "Successful deploy",
@@ -40,7 +40,7 @@ func TestCheckStaticThreshold(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			_, err := CheckStaticThreshold(test.Values.Metric, test.Values.Threshold)
+			_, err := CheckStaticThreshold(test.Values.Metric, test.Values.Threshold, "dummy_metric_name:(avg)")
 
 			if test.ExpectPass == true {
 				assert.NoError(t, err)
@@ -70,11 +70,11 @@ func TestCompareMetrics(t *testing.T) {
 		testDefs{
 			Name: "Metric degradation",
 			Values: values{
-				Curr: 1.0,
-				Prev: 0.5,
+				Curr: float64(4.0 / 3.0),
+				Prev: 1,
 			},
 			ExpectPass:    false,
-			ExpectedError: "Degradation of 0.5%",
+			ExpectedError: "dummy_metric_name:(avg) degradation of 0.33",
 		},
 		testDefs{
 			Name: "Successful deploy",
@@ -88,7 +88,7 @@ func TestCompareMetrics(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			_, err := CompareMetrics(test.Values.Curr, test.Values.Prev)
+			_, err := CompareMetrics(test.Values.Curr, test.Values.Prev, "dummy_metric_name:(avg)")
 
 			if test.ExpectPass == true {
 				assert.NoError(t, err)
