@@ -30,14 +30,14 @@ var (
 	validFailingComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"TestMetric": MetricValuesArray{
+				"dummy_metric_name:avg": MetricValuesArray{
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
 							Timestamp: 1234,
-							Value:     123456789.1234,
+							Value:     1235,
 						},
 					},
 				},
@@ -45,14 +45,14 @@ var (
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"TestMetric": MetricValuesArray{
+				"dummy_metric_name:avg": MetricValuesArray{
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamp: 0123,
-							Value:     0123.0123,
+							Timestamp: 2345,
+							Value:     1234.1234,
 						},
 					},
 				},
@@ -63,7 +63,7 @@ var (
 	validPassingComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"TestMetric": MetricValuesArray{
+				"dummy_metric_name:avg": MetricValuesArray{
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -78,14 +78,14 @@ var (
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"TestMetric": MetricValuesArray{
+				"dummy_metric_name:avg": MetricValuesArray{
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
 							Timestamp: 2345,
-							Value:     2345.2345,
+							Value:     1235,
 						},
 					},
 				},
@@ -105,7 +105,7 @@ var (
 	missingPreviousComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"TestMetric": MetricValuesArray{
+				"dummy_metric_name:avg": MetricValuesArray{
 					MetricValues: []MetricValues{
 						{},
 					},
@@ -114,7 +114,7 @@ var (
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"TestMetric": MetricValuesArray{
+				"dummy_metric_name:avg": MetricValuesArray{
 					MetricValues: nil,
 				},
 			},

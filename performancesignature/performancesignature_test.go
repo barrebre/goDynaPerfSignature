@@ -73,49 +73,53 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "",
+			ExpectedError:   "Metric degradation found: dummy_metric_name:avg degradation of 0.88",
+		},
+		testDefs{
+			Name:            "Valid Relative Check Failing Data",
+			PerfSignature:   datatypes.GetValidSmallRelativePerformanceSignature(),
+			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
+			ExpectPass:      false,
+			ExpectedError:   "Metric degradation found: fail - dummy_metric_name:avg degradation of 0.88, including (0) relative threshold",
+		},
+		testDefs{
+			Name:            "Valid Relative Check Passing Data",
+			PerfSignature:   datatypes.GetValidLargeRelativePerformanceSignature(),
+			MetricsResponse: datatypes.GetValidPassingComparisonMetrics(),
+			ExpectPass:      true,
 		},
 		testDefs{
 			Name:            "Valid Static Check Failing Data",
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "",
+			ExpectedError:   "Metric degradation found: dummy_metric_name:avg was above the static threshold: 1235, instead of a desired 1234.1234",
 		},
 		testDefs{
 			Name:            "Valid Default Check Passing Data",
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidPassingComparisonMetrics(),
 			ExpectPass:      true,
-			ExpectedError:   "",
-		},
-		testDefs{
-			Name:            "Valid Default Check Passing Data",
-			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
-			MetricsResponse: datatypes.GetValidPassingComparisonMetrics(),
-			ExpectPass:      true,
-			ExpectedError:   "",
 		},
 		testDefs{
 			Name:            "No Data Returned",
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetMissingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "",
+			ExpectedError:   "There were no current metrics found for dummy_metric_name:avg",
 		},
 		testDefs{
 			Name:            "No Previous Deployment Data Returned - Default Check",
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetMissingPreviousComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "",
+			ExpectedError:   "No previous metrics to compare against for metric dummy_metric_name:avg",
 		},
 		testDefs{
 			Name:            "No Previous Deployment Data Returned - Static Check",
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetMissingPreviousComparisonMetrics(),
 			ExpectPass:      true,
-			ExpectedError:   "",
 		},
 	}
 
@@ -127,7 +131,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			if test.ExpectPass == true {
 				assert.NoError(t, err)
 			} else {
-				assert.Error(t, err)
+				assert.EqualError(t, err, test.ExpectedError)
 			}
 		})
 	}
