@@ -22,11 +22,7 @@ var config datatypes.Config
 // Create the paths to access the APIs
 func main() {
 	// Get config
-	config, err := utils.GetConfig()
-	if err != nil {
-		fmt.Printf("Problem setting up config: %v. Shutting down!", err)
-		os.Exit(0)
-	}
+	config := utils.GetConfig()
 
 	// Set up server
 	var wait time.Duration
@@ -68,7 +64,7 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Started performanceSignature app on port 8080")
+	fmt.Println("** Started performanceSignature app on port 8080")
 
 	// Make a channel to wait for an OS shutdown. This helps us keep the app running until ctrl+c
 	c := make(chan os.Signal, 1)

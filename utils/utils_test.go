@@ -5,10 +5,9 @@ import (
 	"testing"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
-
-	"github.com/stretchr/testify/assert"
 )
 
+// TODO: Rewrite these tests so they validate the data provided is set in the config. There are no errors to be thrown
 func TestGetConfig(t *testing.T) {
 	type values struct {
 		Config      datatypes.Config
@@ -63,17 +62,7 @@ func TestGetConfig(t *testing.T) {
 				os.Setenv("DT_ENV", "abc1234")
 			}
 
-			// Get Config
-			_, err := GetConfig()
-
-			if test.ExpectPass == true {
-				assert.NoError(t, err)
-			} else {
-				assert.Error(t, err)
-				if test.ExpectedError != "" {
-					assert.EqualError(t, err, test.ExpectedError)
-				}
-			}
+			GetConfig()
 		})
 	}
 }

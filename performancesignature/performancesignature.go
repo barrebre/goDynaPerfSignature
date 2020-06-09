@@ -1,86 +1,36 @@
 package performancesignature
 
 import (
-	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
 	"github.com/barrebre/goDynaPerfSignature/metrics"
-
-	"github.com/davecgh/go-spew/spew"
 )
-
-// ReadAndValidateParams validates the body params sent in the request from the user
-func ReadAndValidateParams(b []byte, config datatypes.Config) (datatypes.PerformanceSignature, error) {
-	// Read POST body params
-	var performanceSignature datatypes.PerformanceSignature
-	err := json.Unmarshal(b, &performanceSignature)
-	if err != nil {
-		return datatypes.PerformanceSignature{}, err
-	}
-
-	// Verify all necessary params were sent
-	updatedPerformanceSignature, err := checkParams(performanceSignature, config)
-	if err != nil {
-		fmt.Println("Encountered error at check params", err)
-		return datatypes.PerformanceSignature{}, err
-	}
-
-	return updatedPerformanceSignature, nil
-}
-
-// Check the required body params sent in with the request to ensure we have all the data we need to query Dt
-func checkParams(p datatypes.PerformanceSignature, config datatypes.Config) (datatypes.PerformanceSignature, error) {
-	if p.APIToken == "" {
-		return datatypes.PerformanceSignature{}, fmt.Errorf("No API Token found in object: %v", spew.Sdump(p))
-	}
-
-	if len(p.Metrics) == 0 {
-		return datatypes.PerformanceSignature{}, fmt.Errorf("No MetricIDs found in object: %v", spew.Sdump(p))
-	}
-
-	if p.ServiceID == "" {
-		return datatypes.PerformanceSignature{}, fmt.Errorf("No Services found in object: %v", spew.Sdump(p))
-	}
-
-	// If there was no server called out
-	if p.DTServer == "" {
-		// And there's no default config
-		if config.Server == "" {
-			return datatypes.PerformanceSignature{}, fmt.Errorf("There is no default server configured and no server was passed with the POST: %v", spew.Sdump(p))
-		}
-
-		p.DTServer = config.Server
-		p.DTEnv = config.Env
-		return p, nil
-	}
-
-	return p, nil
-}
 
 // ProcessRequest handles requests we receive to /performanceSignature
 func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.PerformanceSignature) (string, int, error) {
 	// Build the HTTP request object with query for deployments
 	req, err := buildDeploymentRequest(ps)
 	if err != nil {
-		fmt.Printf("Error building deployment request: %v.\n", err)
+		log.Printf("Error building deployment request: %v.\n", err)
 		return "", 503, fmt.Errorf("Error building deployment request: %v", err)
 	}
 
 	// Query Dt for events on the given service
 	deploymentEvents, err := getDeploymentEvents(*req)
 	if err != nil {
-		fmt.Printf("Encountered error gathering event timestamps: %v\n", err)
+		log.Printf("Encountered error gathering event timestamps: %v.\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
 	}
 
 	// Parse those events to determine when the timestamps we should inspect are
 	timestamps, err := parseDeploymentTimestamps(deploymentEvents, ps.EvaluationMins)
 	if err != nil {
-		fmt.Printf("Error parsing deployment timestamps: %v\n.", err)
+		log.Printf("Error parsing deployment timestamps: %v.\n", err)
 		return "", 503, fmt.Errorf("Error parsing deployment timestamps: %v", err)
 	}
 
@@ -91,16 +41,16 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	// Get the requested metrics for the discovered timestamp(s)
 	metricsResponse, err := metrics.GetMetrics(ps, timestamps)
 	if err != nil {
-		fmt.Printf("Encountered error gathering metrics: %v\n", err)
+		log.Printf("Encountered error gathering metrics: %v.\n", err)
 		return "", 503, fmt.Errorf("Encountered error gathering metrics: %v", err)
 	}
 	// will be used in future for debug logging
-	// fmt.Printf("Found metrics:\n%v\n", metricsResponse)
+	// log.Printf("Found metrics:\n%v\n", metricsResponse)
 
 	// Ensure the gathered metrics are within the expected perfSignature
 	successText, responseCode, err := checkPerfSignature(ps, metricsResponse)
 	if err != nil {
-		fmt.Printf("Error occurred when checking performance signature: %v", err)
+		log.Printf("Error occurred when checking performance signature: %v.\n", err)
 		return "", responseCode, fmt.Errorf("Error occurred when checking performance signature: %v", err)
 	}
 

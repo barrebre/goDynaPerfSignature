@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -9,26 +9,37 @@ import (
 )
 
 // GetConfig retrives the config from the env
-func GetConfig() (datatypes.Config, error) {
+// TODO: optimize this in the future so it doesn't check the getenv each time
+// TODO: change these vars to match the API vars
+func GetConfig() datatypes.Config {
+	log.Printf("** Reading in goDynaPerfSignature Config")
 	server := os.Getenv("DT_SERVER")
 	if server == "" {
-		fmt.Printf("A Dynatrace server was not provided. Requests will not work unless a DT_SERVER is given in the POST body.\n")
+		log.Printf("* A Dynatrace server was not provided. Requests will not work unless a DT_SERVER is given in the POST body.\n")
 	} else {
-		fmt.Printf("Loaded default Dynatrace Server: %v. This can be overridden with any API POST.\n", server)
+		log.Printf("* Loaded default DT_SERVER: %v. This can be overridden with any API POST.\n", server)
 	}
 
 	env := os.Getenv("DT_ENV")
 	if env == "" {
-		fmt.Printf("A Dynatrace environment was not provided. If your tenant has multiple environments, you will need to include this.\n")
+		log.Printf("* A Dynatrace environment was not provided. If your tenant has multiple environments, you will need to include the DT_ENV in the POST body of requests.\n")
 	} else {
-		fmt.Printf("Loaded default Dynatrace Env: %v. This can be overridden with any API POST.\n", env)
+		log.Printf("* Loaded default DT_ENV: %v. This can be overridden with any API POST.\n", env)
+	}
+
+	apiToken := os.Getenv("DT_API_TOKEN")
+	if apiToken == "" {
+		log.Printf("* A Dynatrace API token was not provided. DT_API_TOKEN must be given with every API POST.\n")
+	} else {
+		log.Printf("* Loaded default DT_API_TOKEN: %v. This can be overridden with any API POST.\n", apiToken)
 	}
 
 	config := datatypes.Config{
-		Env:    env,
-		Server: server,
+		APIToken: apiToken,
+		Env:      env,
+		Server:   server,
 	}
-	return config, nil
+	return config
 }
 
 // WriteResponse helps respond to requests

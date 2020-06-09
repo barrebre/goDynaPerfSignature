@@ -12,6 +12,7 @@ docker run -expose -p 8080:8080 --name go-dyna-perf-signature barrebre/go-dyna-p
 
 ### Optional Environment Variables
 Here are some environment variables you may want to consider setting:
+* **DT_API_TOKEN** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`
 * **DT_ENV** - The Dynatrace environment to point to. Use this only if your tenant has multiple environments. *Ex*:`1j23ifj1203fj01923j0`
 * **DT_SERVER** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`
 
