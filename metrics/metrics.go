@@ -12,32 +12,6 @@ import (
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
 )
 
-// CheckStaticThreshold compares the metrics from the current and previous timeframe
-func CheckStaticThreshold(metric float64, threshold float64) (string, error) {
-	delta := metric - threshold
-
-	if delta > 0 {
-		errorMessage := fmt.Sprintf("The metric was above the static threshold: %v, instead of a desired %v", metric, threshold)
-		return errorMessage, fmt.Errorf("The metric was above the static threshold: %v, instead of a desired %v", metric, threshold)
-	}
-
-	successResponse := fmt.Sprintf("Metric fit static threshold: %v instead of %v.\n", metric, threshold)
-	return successResponse, nil
-}
-
-// CompareMetrics compares the metrics from the current and previous timeframe
-func CompareMetrics(curr float64, prev float64) (string, error) {
-	delta := curr - prev
-
-	if delta > 0 {
-		errorMessage := fmt.Sprintf("The metric had a degradation from %v to %v", prev, curr)
-		return errorMessage, fmt.Errorf("Degradation of %v%%", delta)
-	}
-
-	successResponse := fmt.Sprintf("Successful deploy! Improvement by %v.\n", math.Abs(delta))
-	return successResponse, nil
-}
-
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
 func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (datatypes.ComparisonMetrics, error) {
 	// Transform the POSTed metrics into escaped strings
@@ -125,4 +99,30 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 	}
 
 	return metricsResponse, nil
+}
+
+// CheckStaticThreshold compares the metrics from the current and previous timeframe
+func CheckStaticThreshold(value float64, threshold float64, metric string) (string, error) {
+	delta := value - threshold
+
+	if delta > 0 {
+		errorMessage := fmt.Sprintf("%v was above the static threshold: %v, instead of a desired %v", metric, value, threshold)
+		return errorMessage, fmt.Errorf("%v was above the static threshold: %v, instead of a desired %v", metric, value, threshold)
+	}
+
+	successResponse := fmt.Sprintf("%v fit static threshold: %v instead of %v.\n", metric, value, threshold)
+	return successResponse, nil
+}
+
+// CompareMetrics compares the metrics from the current and previous timeframe
+func CompareMetrics(curr float64, prev float64, metric string) (string, error) {
+	delta := curr - prev
+
+	if delta > 0 {
+		errorMessage := fmt.Sprintf("%v had a degradation of %.2f, from %v to %v", metric, delta, prev, curr)
+		return errorMessage, fmt.Errorf("%v degradation of %v", metric, fmt.Sprintf("%.2f", delta))
+	}
+
+	successResponse := fmt.Sprintf("Successful deploy! Improvement by %v.\n", math.Abs(delta))
+	return successResponse, nil
 }

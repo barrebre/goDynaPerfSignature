@@ -123,7 +123,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 		case "static":
 			// will be used in future for debug logging
 			// fmt.Println("Static check")
-			response, err := metrics.CheckStaticThreshold(currentMetricValues, metric.StaticThreshold)
+			response, err := metrics.CheckStaticThreshold(currentMetricValues, metric.StaticThreshold, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v\n", err)
 				fmt.Printf(degradationText)
@@ -136,7 +136,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 			if !canCompare {
 				return "", 400, fmt.Errorf("No previous metrics to compare against for metric %v", cleanMetricName)
 			}
-			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues)
+			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v\n", err)
 				fmt.Printf(degradationText)
