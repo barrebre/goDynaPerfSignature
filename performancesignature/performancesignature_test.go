@@ -82,7 +82,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidSmallRelativePerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: fail - dummy_metric_name:avg degradation of 0.88, including (0) relative threshold",
+			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:avg did not meet the relative threshold criteria. the current performance is 1235.00, which is not better than the previous value of 1234.12 plus the relative threshold of 0.00",
 		},
 		testDefs{
 			Name:            "Valid Relative Check Passing Data",
@@ -95,7 +95,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: dummy_metric_name:percentile(90) was above the static threshold: 1235, instead of a desired 1234.1234",
+			ExpectedError:   "Metric degradation found: dummy_metric_name:percentile(90) was above the static threshold: 1235.00, instead of a desired 1234.12",
 		},
 		testDefs{
 			Name:            "Valid Default Check Passing Data",
