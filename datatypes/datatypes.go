@@ -64,7 +64,7 @@ var (
 		EvaluationMins: 5,
 		Metrics: []Metric{
 			Metric{
-				ID:               "dummy_metric_name:(avg)",
+				ID:               "dummy_metric_name:percentile(90)",
 				StaticThreshold:  1234.1234,
 				ValidationMethod: "static",
 			},
