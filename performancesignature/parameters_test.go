@@ -54,6 +54,16 @@ func TestReadAndValidateParams(t *testing.T) {
 			ExpectedError: "There is no DT_API_TOKEN env variable configured and no APIToken was passed with the POST",
 		},
 		testDefs{
+			Name: "PASS - default APIToken configured",
+			Values: values{
+				APIString: []byte(invalidJSONNoAPIToken),
+				Config: datatypes.Config{
+					APIToken: "asdf",
+				},
+			},
+			ExpectPass: true,
+		},
+		testDefs{
 			Name: "Fail - no metrics provided",
 			Values: values{
 				APIString: []byte(invalidJSONNoMetrics),

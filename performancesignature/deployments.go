@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
 // Gets the deployment events from Dynatrace
@@ -22,15 +23,20 @@ func getDeploymentEvents(req http.Request) (datatypes.DeploymentEvents, error) {
 		fmt.Printf("Error reading Deployment Event data from Dynatrace: %v", err)
 		return datatypes.DeploymentEvents{}, err
 	}
-	// Check the status code
-	if r.StatusCode != 200 {
-		fmt.Printf("Invalid status code from Dynatrace: %v.\n", r.StatusCode)
-		return datatypes.DeploymentEvents{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
-	}
 
 	// Read in the body
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+	if err != nil {
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not read response body from Dynatrace: %v", err.Error())})
+		return datatypes.DeploymentEvents{}, fmt.Errorf("Could not read response body from Dynatrace: %v", err.Error())
+	}
+
+	// Check the status code
+	if r.StatusCode != 200 {
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Body message is '%v'\n", r.StatusCode, string(b))})
+		return datatypes.DeploymentEvents{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
+	}
 
 	// Try to parse the response into DeploymentEvents
 	var deploymentEvents datatypes.DeploymentEvents

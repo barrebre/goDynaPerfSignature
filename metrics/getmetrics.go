@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
@@ -63,11 +64,12 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 	} else {
 		url = fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", server, env, safeMetricNames, ts.StartTime, ts.EndTime, ps.ServiceID)
 	}
+	logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Built URL: %v", url)})
 
 	// Build the request object
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Printf("Error creating request handler: %v", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error creating request handler: %v.", err)})
 		return datatypes.DynatraceMetricsResponse{}, err
 	}
 
@@ -81,19 +83,23 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 	// Perform the request
 	r, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Error reading metric data from Dynatrace: %v", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error reading metric data from Dynatrace: %v", err)})
 		return datatypes.DynatraceMetricsResponse{}, err
-	}
-
-	// Check the status code
-	if r.StatusCode != 200 {
-		fmt.Printf("Invalid status code from Dynatrace: %v.\n", r.StatusCode)
-		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 
 	// Read in the body
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+	if err != nil {
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not read response body from Dynatrace: %v", err.Error())})
+		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("Could not read response body from Dynatrace: %v", err.Error())
+	}
+
+	// Check the status code
+	if r.StatusCode != 200 {
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Message is '%v'\n", r.StatusCode, b)})
+		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
+	}
 
 	// Try to parse the response into MetricsResponses
 	var metricsResponse datatypes.DynatraceMetricsResponse
