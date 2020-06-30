@@ -83,7 +83,7 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 	// Perform the request
 	r, err := client.Do(req)
 	if err != nil {
-		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("ERROR - Error reading metric data from Dynatrace: %v", err)})
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error reading metric data from Dynatrace: %v", err)})
 		return datatypes.DynatraceMetricsResponse{}, err
 	}
 

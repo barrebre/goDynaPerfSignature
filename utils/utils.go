@@ -28,7 +28,7 @@ func GetConfig() datatypes.Config {
 	if env == "" {
 		logging.LogInfo(datatypes.Logging{Message: "A Dynatrace environment was not provided. If your tenant has multiple environments, you will need to include the DT_ENV in the POST body of requests."})
 	} else {
-		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("INFO - Loaded default DT_ENV: %v. This can be overridden with any API POST.", env)})
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Loaded default DT_ENV: %v. This can be overridden with any API POST.", env)})
 	}
 
 	apiToken := os.Getenv("DT_API_TOKEN")
