@@ -41,11 +41,33 @@ var (
 						},
 					},
 				},
+				"dummy_metric_name:percentile(90)": MetricValuesArray{
+					MetricValues: []MetricValues{
+						{
+							Dimensions: []string{
+								"dim1",
+							},
+							Timestamp: 1234,
+							Value:     1235,
+						},
+					},
+				},
 			},
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
 				"dummy_metric_name:avg": MetricValuesArray{
+					MetricValues: []MetricValues{
+						{
+							Dimensions: []string{
+								"dim1",
+							},
+							Timestamp: 2345,
+							Value:     1234.1234,
+						},
+					},
+				},
+				"dummy_metric_name:percentile(90)": MetricValuesArray{
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -110,11 +132,19 @@ var (
 						{},
 					},
 				},
+				"dummy_metric_name:percentile(90)": MetricValuesArray{
+					MetricValues: []MetricValues{
+						{},
+					},
+				},
 			},
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
 				"dummy_metric_name:avg": MetricValuesArray{
+					MetricValues: nil,
+				},
+				"dummy_metric_name:percentile(90)": MetricValuesArray{
 					MetricValues: nil,
 				},
 			},

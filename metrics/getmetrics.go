@@ -15,6 +15,7 @@ import (
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
 func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (datatypes.ComparisonMetrics, error) {
 	safeMetricNames := escapeMetricNames(ps.Metrics)
+	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Escaped safe metric names are: %v", safeMetricNames)})
 
 	// Get the metrics from the most recent Deployment Event
 	metricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, safeMetricNames, ts[0], ps)
@@ -49,6 +50,7 @@ func escapeMetricNames(metricNames []datatypes.Metric) string {
 	for _, metric := range metricNames {
 		safeMetricNames += metric.ID + ","
 	}
+	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Safe metric names are: %v", safeMetricNames)})
 
 	return url.QueryEscape(safeMetricNames)
 }
@@ -97,7 +99,7 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 
 	// Check the status code
 	if r.StatusCode != 200 {
-		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Message is '%v'\n", r.StatusCode, b)})
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Message is '%v'\n", r.StatusCode, string(b))})
 		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 

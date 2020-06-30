@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
 	"github.com/barrebre/goDynaPerfSignature/logging"
@@ -82,28 +81,22 @@ func buildDeploymentRequest(ps datatypes.PerformanceSignature) (*http.Request, e
 	return req, nil
 }
 
-func printDeploymentTimestamps(timestamps []datatypes.Timestamps) {
-	currentStartPretty := time.Unix(timestamps[0].StartTime/1000, 000)
-	currentEndPretty := time.Unix(timestamps[0].EndTime/1000, 000)
-	if len(timestamps) == 1 {
-		fmt.Printf("Found current deployment from %v to %v.\n", currentStartPretty, currentEndPretty)
-	} else if len(timestamps) == 2 {
-		previousStartPretty := time.Unix(timestamps[1].StartTime/1000, 000)
-		previousEndPretty := time.Unix(timestamps[1].EndTime/1000, 000)
-		fmt.Printf("Found previous deployment from %v to %v and current deployment from %v to %v.\n", previousStartPretty, previousEndPretty, currentStartPretty, currentEndPretty)
-	}
-}
-
 // For each metric, perform its checks
 func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, metricsResponse datatypes.ComparisonMetrics) (string, int, error) {
 	successText := ""
 	for _, metric := range performanceSignature.Metrics {
 		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Looking at metric %v", metric)})
 
-		cleanMetricName := strings.ReplaceAll(metric.ID, "(", "")
-		cleanMetricName = strings.ReplaceAll(cleanMetricName, ")", "")
-		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Clean name is: %v\n", cleanMetricName)})
+		var cleanMetricName string
+		if strings.Contains(metric.ID, "percentile") {
+			cleanMetricName = metric.ID
+		} else {
+			cleanMetricName = strings.ReplaceAll(metric.ID, "(", "")
+			cleanMetricName = strings.ReplaceAll(cleanMetricName, ")", "")
+		}
+		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Clean name is: %v.", cleanMetricName)})
 
+		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Current Metrics are: %v.", metricsResponse.CurrentMetrics)})
 		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
 			return "", 400, fmt.Errorf("There were no current metrics found for %v", cleanMetricName)
 		}

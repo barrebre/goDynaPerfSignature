@@ -3,8 +3,10 @@ package performancesignature
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -93,7 +95,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: dummy_metric_name:avg was above the static threshold: 1235, instead of a desired 1234.1234",
+			ExpectedError:   "Metric degradation found: dummy_metric_name:percentile(90) was above the static threshold: 1235, instead of a desired 1234.1234",
 		},
 		testDefs{
 			Name:            "Valid Default Check Passing Data",
@@ -106,7 +108,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetMissingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "There were no current metrics found for dummy_metric_name:avg",
+			ExpectedError:   "There were no current metrics found for dummy_metric_name:percentile(90)",
 		},
 		testDefs{
 			Name:            "No Previous Deployment Data Returned - Default Check",
@@ -171,5 +173,19 @@ func TestPrintDeploymentTimestamps(t *testing.T) {
 
 	for _, test := range tests {
 		printDeploymentTimestamps(test.Values)
+	}
+}
+
+func printDeploymentTimestamps(timestamps []datatypes.Timestamps) {
+	currentStartPretty := time.Unix(timestamps[0].StartTime/1000, 000)
+	currentEndPretty := time.Unix(timestamps[0].EndTime/1000, 000)
+	if len(timestamps) == 1 {
+		deploymentText := fmt.Sprintf("Found current deployment from %v to %v.\n", currentStartPretty, currentEndPretty)
+		logging.LogDebug(datatypes.Logging{Message: deploymentText})
+	} else if len(timestamps) == 2 {
+		previousStartPretty := time.Unix(timestamps[1].StartTime/1000, 000)
+		previousEndPretty := time.Unix(timestamps[1].EndTime/1000, 000)
+		deploymentText := fmt.Sprintf("Found previous deployment from %v to %v and current deployment from %v to %v.\n", previousStartPretty, previousEndPretty, currentStartPretty, currentEndPretty)
+		logging.LogDebug(datatypes.Logging{Message: deploymentText})
 	}
 }
