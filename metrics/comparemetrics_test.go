@@ -29,7 +29,7 @@ func TestCheckRelativeThreshold(t *testing.T) {
 				Threshold: 0.5,
 			},
 			ExpectPass:    false,
-			ExpectedError: "fail - dummy_metric_name:(avg) degradation of 1.00, including (0.5) relative threshold",
+			ExpectedError: "FAIL - dummy_metric_name:(avg) did not meet the relative threshold criteria. the current performance is 1.00, which is not better than the previous value of 0.00 plus the relative threshold of 0.50",
 		},
 		testDefs{
 			Name: "PASS - Passed because threshold",
@@ -39,7 +39,7 @@ func TestCheckRelativeThreshold(t *testing.T) {
 				Threshold: 2,
 			},
 			ExpectPass:   true,
-			ExpectedText: "PASS - dummy_metric_name:(avg)'s current value is 1, which is passable compared to the previous results (0) plus the tolerance (2).\n",
+			ExpectedText: "PASS - dummy_metric_name:(avg)'s current value is 1.00, which is passable compared to the previous results (0.00) plus the tolerance (2.00).\n",
 		},
 		{
 			Name: "PASS - Passed without threshold",
@@ -49,7 +49,7 @@ func TestCheckRelativeThreshold(t *testing.T) {
 				Threshold: 0.5,
 			},
 			ExpectPass:   true,
-			ExpectedText: "PASS - dummy_metric_name:(avg) improvement to 1 from 5. (Difference: -4)\n",
+			ExpectedText: "PASS - dummy_metric_name:(avg) improvement to 1.00 from 5.00. (Difference: -4.00)\n",
 		},
 	}
 
@@ -90,7 +90,7 @@ func TestCheckStaticThreshold(t *testing.T) {
 				Threshold: 0.5,
 			},
 			ExpectPass:    false,
-			ExpectedError: "dummy_metric_name:(avg) was above the static threshold: 1, instead of a desired 0.5",
+			ExpectedError: "dummy_metric_name:(avg) was above the static threshold: 1.00, instead of a desired 0.50",
 		},
 		testDefs{
 			Name: "Successful deploy",
