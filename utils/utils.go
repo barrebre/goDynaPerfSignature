@@ -1,37 +1,46 @@
 package utils
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 )
+
+const version = "1.4.0"
 
 // GetConfig retrives the config from the env
 // TODO: optimize this in the future so it doesn't check the getenv each time
 // TODO: change these vars to match the API vars
 func GetConfig() datatypes.Config {
-	log.Printf("** Reading in goDynaPerfSignature Config")
+	logging.LogInfo(datatypes.Logging{Message: "** Reading in goDynaPerfSignature Config"})
+
 	server := os.Getenv("DT_SERVER")
 	if server == "" {
-		log.Printf("* A Dynatrace server was not provided. Requests will not work unless a DT_SERVER is given in the POST body.\n")
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("A Dynatrace server was not provided. Requests will not work unless a DT_SERVER is given in the POST body.")})
 	} else {
-		log.Printf("* Loaded default DT_SERVER: %v. This can be overridden with any API POST.\n", server)
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Loaded default DT_SERVER: %v. This can be overridden with any API POST", server)})
 	}
 
 	env := os.Getenv("DT_ENV")
 	if env == "" {
-		log.Printf("* A Dynatrace environment was not provided. If your tenant has multiple environments, you will need to include the DT_ENV in the POST body of requests.\n")
+		logging.LogInfo(datatypes.Logging{Message: "A Dynatrace environment was not provided. If your tenant has multiple environments, you will need to include the DT_ENV in the POST body of requests."})
 	} else {
-		log.Printf("* Loaded default DT_ENV: %v. This can be overridden with any API POST.\n", env)
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("INFO - Loaded default DT_ENV: %v. This can be overridden with any API POST.", env)})
 	}
 
 	apiToken := os.Getenv("DT_API_TOKEN")
 	if apiToken == "" {
-		log.Printf("* A Dynatrace API token was not provided. DT_API_TOKEN must be given with every API POST.\n")
+		logging.LogInfo(datatypes.Logging{Message: "A Dynatrace API token was not provided. DT_API_TOKEN must be given with every API POST."})
 	} else {
-		log.Printf("* Loaded default DT_API_TOKEN: %v. This can be overridden with any API POST.\n", apiToken)
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Loaded default DT_API_TOKEN: %v. This can be overridden with any API POST.", apiToken)})
+	}
+
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel != "" {
+		logging.SetLogLevel(logLevel)
 	}
 
 	config := datatypes.Config{
@@ -40,6 +49,11 @@ func GetConfig() datatypes.Config {
 		Server:   server,
 	}
 	return config
+}
+
+// GetAppVersion returns the tagged version of goDynaPerfSignature
+func GetAppVersion() string {
+	return version
 }
 
 // WriteResponse helps respond to requests

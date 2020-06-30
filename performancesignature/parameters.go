@@ -3,9 +3,9 @@ package performancesignature
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
 // ReadAndValidateParams validates the body params sent in the request from the user
@@ -45,7 +45,7 @@ func checkParams(params datatypes.PerformanceSignature, config datatypes.Config)
 	// Finally, ensure we have all the params we need
 	err := validateParams(finalQuery)
 	if err != nil {
-		log.Printf("checkParams error - %v.\n", err.Error())
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Was not able to validate parameters: %v.\n", err.Error())})
 		return datatypes.PerformanceSignature{}, err
 	}
 

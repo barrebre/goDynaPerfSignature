@@ -15,6 +15,7 @@ Here are some environment variables you may want to consider setting:
 * **DT_API_TOKEN** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`
 * **DT_ENV** - The Dynatrace environment to point to. Use this only if your tenant has multiple environments. *Ex*:`1j23ifj1203fj01923j0`
 * **DT_SERVER** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`
+* **LOG_LEVEL** - The logging level of the app. The default is `ERROR`, so only errors will be listed. For greater verbosity, try `INFO` or `DEBUG`.
 
 If you would like to set the DT_ENV or DT_SERVER, you can edit the `docker_env` file and then run
 ```
@@ -51,6 +52,11 @@ From another terminal, you can make requests to the app via a curl like this one
 
 ```
 curl -v -XPOST -d '{"APIToken":"","Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+```
+
+Or this one:
+```
+curl -v -XPOST -d '{"EvaluationMins":5,"Metrics":[{"ID":"builtin:service.response.time:(percentile(90))"}],"ServiceID":"SERVICE-FFA6FB5E2FA9FFA8"}' localhost:8080/performanceSignature
 ```
 
 # Development

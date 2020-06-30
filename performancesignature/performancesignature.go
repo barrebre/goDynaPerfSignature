@@ -2,12 +2,12 @@ package performancesignature
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 	"github.com/barrebre/goDynaPerfSignature/metrics"
 )
 
@@ -16,21 +16,21 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	// Build the HTTP request object with query for deployments
 	req, err := buildDeploymentRequest(ps)
 	if err != nil {
-		log.Printf("Error building deployment request: %v.\n", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error building deployment request: %v.", err)})
 		return "", 503, fmt.Errorf("Error building deployment request: %v", err)
 	}
 
 	// Query Dt for events on the given service
 	deploymentEvents, err := getDeploymentEvents(*req)
 	if err != nil {
-		log.Printf("Encountered error gathering event timestamps: %v.\n", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering event timestamps: %v.", err)})
 		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
 	}
 
 	// Parse those events to determine when the timestamps we should inspect are
 	timestamps, err := parseDeploymentTimestamps(deploymentEvents, ps.EvaluationMins)
 	if err != nil {
-		log.Printf("Error parsing deployment timestamps: %v.\n", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error parsing deployment timestamps: %v.", err)})
 		return "", 503, fmt.Errorf("Error parsing deployment timestamps: %v", err)
 	}
 
@@ -41,20 +41,19 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	// Get the requested metrics for the discovered timestamp(s)
 	metricsResponse, err := metrics.GetMetrics(ps, timestamps)
 	if err != nil {
-		log.Printf("Encountered error gathering metrics: %v.\n", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering metrics: %v.", err)})
 		return "", 503, fmt.Errorf("Encountered error gathering metrics: %v", err)
 	}
-	// will be used in future for debug logging
-	// log.Printf("Found metrics:\n%v\n", metricsResponse)
+	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Found metrics:\n%v\n", metricsResponse)})
 
 	// Ensure the gathered metrics are within the expected perfSignature
 	successText, responseCode, err := checkPerfSignature(ps, metricsResponse)
 	if err != nil {
-		log.Printf("Error occurred when checking performance signature: %v.\n", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error occurred when checking performance signature: %v.\n", err)})
 		return "", responseCode, fmt.Errorf("Error occurred when checking performance signature: %v", err)
 	}
 
-	log.Println(successText)
+	logging.LogInfo(datatypes.Logging{Message: successText})
 	return successText, 0, nil
 }
 
@@ -99,12 +98,11 @@ func printDeploymentTimestamps(timestamps []datatypes.Timestamps) {
 func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, metricsResponse datatypes.ComparisonMetrics) (string, int, error) {
 	successText := ""
 	for _, metric := range performanceSignature.Metrics {
-		// will be used in future for debug logging
-		// fmt.Printf("Looking at metric %v\n", metric)
+		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Looking at metric %v", metric)})
+
 		cleanMetricName := strings.ReplaceAll(metric.ID, "(", "")
 		cleanMetricName = strings.ReplaceAll(cleanMetricName, ")", "")
-		// will be used in future for debug logging
-		// fmt.Printf("Clean name is: %v\n", cleanMetricName)
+		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Clean name is: %v\n", cleanMetricName)})
 
 		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
 			return "", 400, fmt.Errorf("There were no current metrics found for %v", cleanMetricName)
@@ -122,35 +120,32 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 
 		switch checkCounts := metric.ValidationMethod; checkCounts {
 		case "relative":
-			// will be used in future for debug logging
-			// fmt.Println("relative check")
+			logging.LogDebug(datatypes.Logging{Message: "Relative Check"})
 			response, err := metrics.CheckRelativeThreshold(currentMetricValues, previousMetricValues, metric.RelativeThreshold, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
-				log.Println(degradationText)
+				logging.LogInfo(datatypes.Logging{Message: degradationText})
 				return "", 406, fmt.Errorf(degradationText)
 			}
 			successText += response
 		case "static":
-			// will be used in future for debug logging
-			// fmt.Println("Static check")
+			logging.LogDebug(datatypes.Logging{Message: "Static Check"})
 			response, err := metrics.CheckStaticThreshold(currentMetricValues, metric.StaticThreshold, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
-				log.Println(degradationText)
+				logging.LogInfo(datatypes.Logging{Message: degradationText})
 				return "", 406, fmt.Errorf(degradationText)
 			}
 			successText += response
 		default:
-			// will be used in future for debug logging
-			// fmt.Println("Default check")
+			logging.LogDebug(datatypes.Logging{Message: "Default Check"})
 			if !canCompare {
 				return "", 400, fmt.Errorf("No previous metrics to compare against for metric %v", cleanMetricName)
 			}
 			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
-				log.Println(degradationText)
+				logging.LogInfo(datatypes.Logging{Message: degradationText})
 				return "", 406, fmt.Errorf(degradationText)
 			}
 			successText += response

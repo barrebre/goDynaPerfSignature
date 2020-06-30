@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 	"github.com/barrebre/goDynaPerfSignature/performancesignature"
 	"github.com/barrebre/goDynaPerfSignature/utils"
 
@@ -21,6 +21,8 @@ var config datatypes.Config
 
 // Create the paths to access the APIs
 func main() {
+	logging.LogSystem(datatypes.Logging{Message: fmt.Sprintf("Starting goDynaPerfSig version: %v on port 8080", utils.GetAppVersion())})
+
 	// Get config
 	config := utils.GetConfig()
 
@@ -60,11 +62,11 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			log.Println(err)
+			logging.LogSystem(datatypes.Logging{Message: err.Error()})
 		}
 	}()
 
-	fmt.Println("** Started performanceSignature app on port 8080")
+	logging.LogSystem(datatypes.Logging{Message: "Finished starting goDynaPerfSig"})
 
 	// Make a channel to wait for an OS shutdown. This helps us keep the app running until ctrl+c
 	c := make(chan os.Signal, 1)
@@ -75,6 +77,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 	srv.Shutdown(ctx)
-	log.Println("\nShutting down goDynaPerfSignature.")
+	logging.LogInfo(datatypes.Logging{Message: "Shutting down goDynaPerfSignature."})
 	os.Exit(0)
 }
