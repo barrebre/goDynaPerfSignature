@@ -41,6 +41,9 @@ func GetConfig() datatypes.Config {
 	logLevel := os.Getenv("LOG_LEVEL")
 	if logLevel != "" {
 		logging.SetLogLevel(logLevel)
+		logging.LogSystem(datatypes.Logging{Message: fmt.Sprintf("LOG_LEVEL set to %v from env var", logLevel)})
+	} else {
+		logging.LogSystem(datatypes.Logging{Message: "LOG_LEVEL not found in ENV. Defaulting to ERROR"})
 	}
 
 	config := datatypes.Config{
