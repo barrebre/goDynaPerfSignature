@@ -15,6 +15,14 @@ const version = "1.4.2"
 // TODO: optimize this in the future so it doesn't check the getenv each time
 // TODO: change these vars to match the API vars
 func GetConfig() datatypes.Config {
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel != "" {
+		logging.SetLogLevel(logLevel)
+		logging.LogSystem(datatypes.Logging{Message: fmt.Sprintf("LOG_LEVEL set to %v from env var", logLevel)})
+	} else {
+		logging.LogSystem(datatypes.Logging{Message: "LOG_LEVEL not found in ENV. Defaulting to ERROR"})
+	}
+
 	logging.LogInfo(datatypes.Logging{Message: "** Reading in goDynaPerfSignature Config"})
 
 	server := os.Getenv("DT_SERVER")
@@ -36,14 +44,6 @@ func GetConfig() datatypes.Config {
 		logging.LogInfo(datatypes.Logging{Message: "A Dynatrace API token was not provided. DT_API_TOKEN must be given with every API POST."})
 	} else {
 		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Loaded default DT_API_TOKEN: %v. This can be overridden with any API POST.", apiToken)})
-	}
-
-	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel != "" {
-		logging.SetLogLevel(logLevel)
-		logging.LogSystem(datatypes.Logging{Message: fmt.Sprintf("LOG_LEVEL set to %v from env var", logLevel)})
-	} else {
-		logging.LogSystem(datatypes.Logging{Message: "LOG_LEVEL not found in ENV. Defaulting to ERROR"})
 	}
 
 	config := datatypes.Config{
