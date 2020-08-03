@@ -1,15 +1,15 @@
 # goDynaPerfSignature
 goDynaPerfSignature is an Automated Quality Gate for Dynatrace. It is a standalone Go application which can query Dynatrace environments and compare Service metrics.
 
-[Deployment Events](https://www.dynatrace.com/support/help/shortlink/event-types-info#deployment) must be pushed to Dynatrace for goDynaPerfSignature to know when to evaluated metrics.
+[Deployment Events](https://www.dynatrace.com/support/help/shortlink/event-types-info#deployment) must be pushed to Dynatrace for goDynaPerfSignature to know when to evaluate metrics.
 
 This application:
 1. Queries Dynatrace for Deployment Events pushed to the provided `ServiceID`
-  * If there are no Deployment Events, goDynaPerfSignature auto-passes
+    * If there are no Deployment Events, goDynaPerfSignature auto-passes
 2. Queries Dynatrace for the metrics of the provided `ServiceID` when there were Deployment Events
 3. Performs the provided `ValidationMethod`
-  * If there's only one Deployment Event, goDynaPerfSignature can only use the `StaticThreshold` validation
-  * If there is more than one Deployment Event, goDynaPerfSignature will evaluate any of the available `ValidationMethod`s on the last two most recent Deployment Events' timeframes
+    * If there's only one Deployment Event, goDynaPerfSignature can only use the `StaticThreshold` validation
+    * If there is more than one Deployment Event, goDynaPerfSignature will evaluate any of the available `ValidationMethod`s on the last two most recent Deployment Events' timeframes
 4. Returns a response code based on the evaluation results
 
 # Running goDynaPerfSignature
@@ -53,9 +53,9 @@ Below are the required parameters to query goDynaPerfSignature:
 * **EvaluationMins** - If you would rather provide an evaluation timeframe than use the duration of Deployment Events, provide a number of minutes in this field. goDynaPerfSignature will evaluate metrics from the beginning of the discovered Deployment Events for the EvaluationMinutes duration. *Ex*: `5`
 
 ## Examples
-This example queries two different metrics and also passes along a blank APIToken:
+This example queries two different metrics:
 ```
-curl -v -XPOST -d '{"APIToken":"","Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+curl -v -XPOST -d '{"Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
 ```
 
 This example queries for a percentile and does not provide the APIToken. This call will only work if goDynaPerfSignature is started with an DT_API_TOKEN configured:
