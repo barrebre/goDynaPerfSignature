@@ -1,35 +1,41 @@
 # goDynaPerfSignature
-This repo is a standalone Go application which will allow users to query their Dynatrace environments and compare the performance of current code deployments to previous ones.
+goDynaPerfSignature is an Automated Quality Gate for Dynatrace. It is a standalone Go application which can query Dynatrace environments and compare Service metrics.
 
-# Running the Application
-This application can be run in Docker or in Golang.
+[Deployment Events](https://www.dynatrace.com/support/help/shortlink/event-types-info#deployment) must be pushed to Dynatrace for goDynaPerfSignature to know when to evaluate metrics.
 
-## Running the App using Docker
-The Dockerhub for the repo can be found [here](https://hub.docker.com/r/barrebre/go-dyna-perf-signature/tags). You can run this by calling
+This application:
+1. Queries Dynatrace for Deployment Events pushed to the provided `ServiceID`
+    * If there are no Deployment Events, goDynaPerfSignature auto-passes
+2. Queries Dynatrace for the metrics of the provided `ServiceID` when there were Deployment Events
+3. Performs the provided `ValidationMethod`
+    * If there's only one Deployment Event, goDynaPerfSignature can only use the `StaticThreshold` validation
+    * If there is more than one Deployment Event, goDynaPerfSignature will evaluate any of the available `ValidationMethod`s on the last two most recent Deployment Events' timeframes
+4. Returns a response code based on the evaluation results
+
+# Running goDynaPerfSignature
+The Dockerhub for the repo can be found [here](https://hub.docker.com/r/barrebre/go-dyna-perf-signature/tags). You can run this by calling:
 ```
 docker run -expose -p 8080:8080 --name go-dyna-perf-signature barrebre/go-dyna-perf-signature
 ```
 
 ### Optional Environment Variables
-Here are some environment variables you may want to consider setting:
-* **DT_API_TOKEN** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`
-* **DT_ENV** - The Dynatrace environment to point to. Use this only if your tenant has multiple environments. *Ex*:`1j23ifj1203fj01923j0`
-* **DT_SERVER** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`
-* **LOG_LEVEL** - The logging level of the app. The default is `ERROR`, so only errors will be listed. For greater verbosity, try `INFO` or `DEBUG`.
+The following parameters can be set at application startup:
+* **DT_API_TOKEN** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`. By providing the DT_API_TOKEN at startup, requests to goDynaPerfSignature will use the provided value by default. This can be overwritten with any request by providing the `APIToken` in the payload
+* **DT_ENV** - The Dynatrace environment to query. Use this only if your tenant has multiple environments. *Ex*:`https://{DT_SERVER}/e/{DT_ENV}/`. This can be overwritten with any request by providing the `APIToken` in the payload
+* **DT_SERVER** - The Dynatrace Server to point to (FQDN). *Ex*: `https://{DT_SERVER}.live.dynatrace.com`. This can be overwritten with any request by providing the `APIToken` in the payload
+* **LOG_LEVEL** - The logging level (the default is `ERROR`, so only errors will be listed). For greater verbosity, use `INFO` or `DEBUG`
 
-If you would like to set the DT_ENV or DT_SERVER, you can edit the `docker_env` file and then run
+To start with any of these parameters, edit the `docker_env` file and then run:
 ```
 docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env barrebre/go-dyna-perf-signature
 ```
 
-## Running Locally via Go
-You can run this locally by simply calling `go run .`
-
 # Calling the Application
-Once you have an instance of the application running, you'll want to make calls to it.
+Below are the required parameters to query goDynaPerfSignature:
 
 ## Required Parameters
-* **APIToken** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`
+* **APIToken** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`. This is not actually required if goDynaPerfSignature is started with a `DT_API_TOKEN`
+* **DTServer** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`. This is not actually required if goDynaPerfSignature is started with a `DT_SERVER`
 * **Metrics** - A comma-delimited array of the metrics you'd like to inspect. 
   * **ID** - The ID of the metric - The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API.
     * `builtin:service.response.time:(avg)`
@@ -43,37 +49,16 @@ Once you have an instance of the application running, you'll want to make calls 
   * `SERVICE-5D4E743B2BF0CCF5`
 
 ## Optional Parameters
-* **DTEnv** - The Dynatrace environment to point to. Use this only if your tenant has multiple environments. *Ex*:`1j23ifj1203fj01923j0`
-* **DTServer** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`
-* **EvaluationMins** - If you would rather provide an evaluation timeframe than use the duration of Deployment Events, provide a number of minutes in this field. *Ex*: `5`
+* **DTEnv** - The Dynatrace environment to query. Use this only if your tenant has multiple environments. *Ex*:`https://{DT_SERVER}/e/{DT_ENV}/`
+* **EvaluationMins** - If you would rather provide an evaluation timeframe than use the duration of Deployment Events, provide a number of minutes in this field. goDynaPerfSignature will evaluate metrics from the beginning of the discovered Deployment Events for the EvaluationMinutes duration. *Ex*: `5`
 
-## Example
-From another terminal, you can make requests to the app via a curl like this one:
-
+## Examples
+This example queries two different metrics:
 ```
-curl -v -XPOST -d '{"APIToken":"","Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+curl -v -XPOST -d '{"Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
 ```
 
-Or this one:
+This example queries for a percentile and does not provide the APIToken. This call will only work if goDynaPerfSignature is started with an DT_API_TOKEN configured:
 ```
 curl -v -XPOST -d '{"EvaluationMins":5,"Metrics":[{"ID":"builtin:service.response.time:(percentile(90))"}],"ServiceID":"SERVICE-FFA6FB5E2FA9FFA8"}' localhost:8080/performanceSignature
-```
-
-# Development
-Current development notes
-
-## Building the App using Docker
-First, you will need to build the docker image. To do so
-1. Run `docker build -t go-dyna-perf-signature .`
-1. Then `docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env go-dyna-performance-signature`
-
-A clean way to run this in Windows is
-
-```
-docker ps -a -q -f name=go-dyna-perf-signature | % { docker stop $_; docker rm $_ }; docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env go-dyna-perf-signature
-```
-
-## Build One-Liner
-```
-docker ps -a -q -f name=go-dyna-perf-signature | % { docker stop $_ }; docker ps -a -q -f name=go-dyna-perf-signature | % { docker rm $_ }; docker run -expose -p 8080:8080 --name go-dyna-perf-signature --env-file ./docker_env barrebre/go-dyna-perf-signature
 ```
