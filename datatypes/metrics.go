@@ -2,6 +2,14 @@ package datatypes
 
 //// Definitions
 
+// Metric defines a Dynatrace Service we'd like to investigate and how we'd like to validate it
+type Metric struct {
+	ID                string
+	RelativeThreshold float64
+	StaticThreshold   float64
+	ValidationMethod  string
+}
+
 // ComparisonMetrics has a current and previous set of metrics to compare
 type ComparisonMetrics struct {
 	CurrentMetrics  DynatraceMetricsResponse
