@@ -127,9 +127,8 @@ func TestCheckPerfSignature(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			successText, responseCode, err := checkPerfSignature(test.PerfSignature, test.MetricsResponse)
+			_, _, err := checkPerfSignature(test.PerfSignature, test.MetricsResponse)
 
-			fmt.Println(successText, responseCode, err)
 			if test.ExpectPass == true {
 				assert.NoError(t, err)
 			} else {
