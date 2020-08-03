@@ -20,7 +20,7 @@ func getDeploymentEvents(req http.Request) (datatypes.DeploymentEvents, error) {
 	// Perform the request
 	r, err := client.Do(&req)
 	if err != nil {
-		fmt.Printf("Error reading Deployment Event data from Dynatrace: %v", err)
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Error reading Deployment Event data from Dynatrace: %v", err)})
 		return datatypes.DeploymentEvents{}, err
 	}
 
@@ -54,7 +54,7 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 
 	// If there are no deployment events previously, we can still perform static checks
 	if eventsFound == 0 {
-		fmt.Println("There haven't been enough deployment events. Auto-passing")
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprint("There haven't been enough deployment events. Auto-passing")})
 		return []datatypes.Timestamps{}, nil
 		// If there is only one deployment event, we can still perform static checks
 	} else if eventsFound == 1 {

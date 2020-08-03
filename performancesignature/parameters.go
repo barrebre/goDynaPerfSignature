@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
-	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
 // ReadAndValidateParams validates the body params sent in the request from the user
@@ -20,8 +19,7 @@ func ReadAndValidateParams(b []byte, config datatypes.Config) (datatypes.Perform
 	// Verify all necessary params were sent
 	updatedPerformanceSignature, err := checkParams(performanceSignature, config)
 	if err != nil {
-		fmt.Printf("Encountered error at check params - %v.\n", err)
-		return datatypes.PerformanceSignature{}, err
+		return datatypes.PerformanceSignature{}, fmt.Errorf(fmt.Sprintf("checkParams - %v", err.Error()))
 	}
 
 	return updatedPerformanceSignature, nil
@@ -45,8 +43,7 @@ func checkParams(params datatypes.PerformanceSignature, config datatypes.Config)
 	// Finally, ensure we have all the params we need
 	err := validateParams(finalQuery)
 	if err != nil {
-		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Was not able to validate parameters: %v.\n", err.Error())})
-		return datatypes.PerformanceSignature{}, err
+		return datatypes.PerformanceSignature{}, fmt.Errorf(fmt.Sprintf("Couldn't validate parameters: %v", err.Error()))
 	}
 
 	return finalQuery, nil

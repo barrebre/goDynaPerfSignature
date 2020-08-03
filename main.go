@@ -40,13 +40,17 @@ func main() {
 		// Pull out and verify the provided params
 		ps, err := performancesignature.ReadAndValidateParams(b, config)
 		if err != nil {
+			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams: %v.", err.Error())})
 			utils.WriteResponse(w, r, "", err, 400)
+			return
 		}
 
 		// Perform the performance signature
 		responseText, errCode, err := performancesignature.ProcessRequest(w, r, ps)
 		if err != nil {
+			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ProcessRequest: %v.", err.Error())})
 			utils.WriteResponse(w, r, "", err, errCode)
+			return
 		}
 
 		utils.WriteResponse(w, r, responseText, nil, 0)

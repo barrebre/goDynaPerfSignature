@@ -70,7 +70,7 @@ func buildDeploymentRequest(ps datatypes.PerformanceSignature) (*http.Request, e
 	// Build the request object
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Printf("Error creating request handler: %v", err)
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error creating request handler: %v", err)})
 		return &http.Request{}, err
 	}
 
