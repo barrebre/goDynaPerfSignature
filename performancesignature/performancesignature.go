@@ -67,6 +67,11 @@ func buildDeploymentRequest(ps datatypes.PerformanceSignature) (*http.Request, e
 		url = fmt.Sprintf("https://%v/e/%v/api/v1/events?eventType=CUSTOM_DEPLOYMENT&entityId=%v", ps.DTServer, ps.DTEnv, ps.ServiceID)
 	}
 
+	if ps.EventAge != 0 {
+		url += fmt.Sprintf("&from=%v", ps.EventAge)
+		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Found EventAge with request - new URL is %v", url)})
+	}
+
 	// Build the request object
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

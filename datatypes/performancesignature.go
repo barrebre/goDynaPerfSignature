@@ -8,6 +8,7 @@ type PerformanceSignature struct {
 	DTEnv          string
 	DTServer       string
 	EvaluationMins int
+	EventAge       int
 	Metrics        []Metric
 	ServiceID      string
 }
@@ -17,6 +18,7 @@ var (
 	validDefaultPerformanceSignature = PerformanceSignature{
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
+		EventAge:       1598818148,
 		Metrics: []Metric{
 			Metric{
 				ID: "dummy_metric_name:(avg)",
@@ -28,6 +30,7 @@ var (
 	validLargeRelativePerformanceSignature = PerformanceSignature{
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
+		EventAge:       10234,
 		Metrics: []Metric{
 			Metric{
 				ID:                "dummy_metric_name:(avg)",
@@ -41,6 +44,7 @@ var (
 	validSmallRelativePerformanceSignature = PerformanceSignature{
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
+		EventAge:       992348,
 		Metrics: []Metric{
 			Metric{
 				ID:                "dummy_metric_name:(avg)",

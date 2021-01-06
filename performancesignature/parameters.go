@@ -3,8 +3,10 @@ package performancesignature
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
 // ReadAndValidateParams validates the body params sent in the request from the user
@@ -33,6 +35,7 @@ func checkParams(params datatypes.PerformanceSignature, config datatypes.Config)
 		DTEnv:          config.Env,
 		DTServer:       config.Server,
 		EvaluationMins: params.EvaluationMins,
+		EventAge:       params.EventAge,
 		Metrics:        params.Metrics,
 		ServiceID:      params.ServiceID,
 	}
@@ -49,6 +52,12 @@ func checkParams(params datatypes.PerformanceSignature, config datatypes.Config)
 	return finalQuery, nil
 }
 
+func calculateAgeEpoch(days int) int {
+	logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Received eventAge for event. Checking %v days back", days)})
+	pastTime := time.Now().AddDate(0, 0, -days)
+	return int(pastTime.Unix() * 1000)
+}
+
 // This function applies all of the POST parameters over the default config of the goDynaPerfSignature
 func applyPostParams(params datatypes.PerformanceSignature, finalQuery *datatypes.PerformanceSignature) {
 	if params.APIToken != "" {
@@ -61,6 +70,10 @@ func applyPostParams(params datatypes.PerformanceSignature, finalQuery *datatype
 
 	if params.DTEnv != "" {
 		finalQuery.DTEnv = params.DTEnv
+	}
+
+	if params.EventAge != 0 {
+		finalQuery.EventAge = calculateAgeEpoch(params.EventAge)
 	}
 }
 

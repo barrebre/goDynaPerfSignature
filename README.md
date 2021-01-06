@@ -51,14 +51,15 @@ Below are the required parameters to query goDynaPerfSignature:
 ## Optional Parameters
 * **DTEnv** - The Dynatrace environment to query. Use this only if your tenant has multiple environments. *Ex*:`https://{DT_SERVER}/e/{DT_ENV}/`
 * **EvaluationMins** - If you would rather provide an evaluation timeframe than use the duration of Deployment Events, provide a number of minutes in this field. goDynaPerfSignature will evaluate metrics from the beginning of the discovered Deployment Events for the EvaluationMinutes duration. *Ex*: `5`
+* **EventAge** - Set the number of days to look for Events pushed to the Events API. Use this in case you haven't pushed a new event in the last 30 days, which is the default timeframe Dynatrace queries for. *Ex*: `180`
 
 ## Examples
 This example queries two different metrics:
 ```
-curl -v -XPOST -d '{"Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+curl -v -XPOST -d '{"EventAge":180,"Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
 ```
 
 This example queries for a percentile and does not provide the APIToken. This call will only work if goDynaPerfSignature is started with an DT_API_TOKEN configured:
 ```
-curl -v -XPOST -d '{"EvaluationMins":5,"Metrics":[{"ID":"builtin:service.response.time:(percentile(90))"}],"ServiceID":"SERVICE-FFA6FB5E2FA9FFA8"}' localhost:8080/performanceSignature
+curl -v -XPOST -d '{"EvaluationMins":5,"EventAge":1580510893000,"Metrics":[{"ID":"builtin:service.response.time:(percentile(90))"}],"ServiceID":"SERVICE-FFA6FB5E2FA9FFA8"}' localhost:8080/performanceSignature
 ```
