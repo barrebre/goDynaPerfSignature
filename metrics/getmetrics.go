@@ -14,18 +14,18 @@ import (
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
 func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (datatypes.ComparisonMetrics, error) {
-	safeMetricNames := escapeMetricNames(ps.Metrics)
-	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Escaped safe metric names are: %v", safeMetricNames)})
+	metricString := createMetricString(ps.Metrics)
+	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Escaped safe metric names are: %v", metricString)})
 
 	// Get the metrics from the most recent Deployment Event
-	metricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, safeMetricNames, ts[0], ps)
+	metricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, metricString, ts[0], ps)
 	if err != nil {
 		return datatypes.ComparisonMetrics{}, fmt.Errorf("Error querying current metrics from Dynatrace: %v", err)
 	}
 
 	// If there were two Deployment Events, get the second set of metrics
 	if len(ts) == 2 {
-		previousMetricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, safeMetricNames, ts[1], ps)
+		previousMetricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, metricString, ts[1], ps)
 		if err != nil {
 			return datatypes.ComparisonMetrics{}, fmt.Errorf("Error querying previous metrics from Dynatrace: %v", err)
 		}
@@ -45,28 +45,19 @@ func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (d
 }
 
 // Transform the POSTed metrics into escaped strings
-func escapeMetricNames(metricNames []datatypes.Metric) string {
-	safeMetricNames := ""
+func createMetricString(metricNames []datatypes.Metric) string {
+	metricString := ""
 	for _, metric := range metricNames {
-		safeMetricNames += metric.ID + ","
+		metricString += metric.ID + ","
 	}
-	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Safe metric names are: %v", safeMetricNames)})
+	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Safe metric names are: %v", metricString)})
 
-	return url.QueryEscape(safeMetricNames)
+	return metricString
 }
 
 // queryMetrics actually performs the HTTP request to Dynatrace to get the metrics
-func queryMetrics(server string, env string, safeMetricNames string, ts datatypes.Timestamps, ps datatypes.PerformanceSignature) (datatypes.DynatraceMetricsResponse, error) {
-	// Build the URL
-	var url string
-
-	// Check if there's a Dynatrace environment specified
-	if env == "" {
-		url = fmt.Sprintf("https://%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", server, safeMetricNames, ts.StartTime, ts.EndTime, ps.ServiceID)
-	} else {
-		url = fmt.Sprintf("https://%v/e/%v/api/v2/metrics/series/%v?resolution=Inf&from=%v&to=%v&scope=entity(%v)", server, env, safeMetricNames, ts.StartTime, ts.EndTime, ps.ServiceID)
-	}
-	logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Built URL: %v", url)})
+func queryMetrics(server string, env string, metricString string, ts datatypes.Timestamps, ps datatypes.PerformanceSignature) (datatypes.DynatraceMetricsResponse, error) {
+	url := buildMetricsQueryURL(server, env, metricString, ts, ps)
 
 	// Build the request object
 	req, err := http.NewRequest("GET", url, nil)
@@ -111,4 +102,29 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 	}
 
 	return metricsResponse, nil
+}
+
+// buildMetricsQueryURL takes all required params and build the URL which will be queried
+func buildMetricsQueryURL(server string, env string, metricString string, ts datatypes.Timestamps, ps datatypes.PerformanceSignature) string {
+	newURL := url.URL{
+		Scheme: "https",
+		Host:   server,
+	}
+
+	q := newURL.Query()
+	q.Set("resolution", "Inf")
+	q.Set("from", fmt.Sprint(ts.StartTime))
+	q.Set("to", fmt.Sprint(ts.EndTime))
+	q.Set("scope", fmt.Sprintf("entity(%v)", ps.ServiceID))
+	newURL.RawQuery = q.Encode()
+
+	// Check if there's a Dynatrace environment specified
+	if env == "" {
+		newURL.Path = fmt.Sprintf("api/v2/metrics/series/%v", metricString)
+	} else {
+		newURL.Path = fmt.Sprintf("/e/%v/api/v2/metrics/series/%v", env, metricString)
+	}
+	logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Built URL: %v", newURL.String())})
+
+	return newURL.String()
 }

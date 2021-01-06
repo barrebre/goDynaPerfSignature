@@ -9,7 +9,7 @@ import (
 	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
-const version = "1.4.5"
+const version = "1.4.6"
 
 // GetConfig retrives the config from the env
 // TODO: optimize this in the future so it doesn't check the getenv each time
