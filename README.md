@@ -61,5 +61,5 @@ curl -v -XPOST -d '{"EventAge":180,"Metrics":[{"ID":"builtin:service.response.ti
 
 This example queries for a percentile and does not provide the APIToken. This call will only work if goDynaPerfSignature is started with an DT_API_TOKEN configured:
 ```
-curl -v -XPOST -d '{"EvaluationMins":5,"EventAge":1580510893000,"Metrics":[{"ID":"builtin:service.response.time:(percentile(90))"}],"ServiceID":"SERVICE-FFA6FB5E2FA9FFA8"}' localhost:8080/performanceSignature
+curl -v -XPOST -d '{"EvaluationMins":5,"Metrics":[{"ID":"builtin:service.response.time:(percentile(90))"}],"ServiceID":"SERVICE-FFA6FB5E2FA9FFA8"}' localhost:8080/performanceSignature
 ```
