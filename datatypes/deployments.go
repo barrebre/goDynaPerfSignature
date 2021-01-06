@@ -56,11 +56,16 @@ var (
 		},
 	}
 
-	singleTimestamp = []Timestamps{
+	singleTimestamps = []Timestamps{
 		{
 			StartTime: 1234,
 			EndTime:   2345,
 		},
+	}
+
+	singleTimestamp = Timestamps{
+		StartTime: 1234,
+		EndTime:   2345,
 	}
 )
 
@@ -83,5 +88,10 @@ func GetSingleEventDeploymentEvent() DeploymentEvents {
 
 // GetSingleTimestamps returns a []Timestamps with a single timestamp
 func GetSingleTimestamps() []Timestamps {
+	return singleTimestamps
+}
+
+// GetSingleTimestamp returns a Timestamps object
+func GetSingleTimestamp() Timestamps {
 	return singleTimestamp
 }
