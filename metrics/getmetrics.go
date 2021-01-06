@@ -99,7 +99,7 @@ func queryMetrics(server string, env string, safeMetricNames string, ts datatype
 
 	// Check the status code
 	if r.StatusCode != 200 {
-		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Message is '%v'\n", r.StatusCode, string(b))})
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Message is '%v'", r.StatusCode, string(b))})
 		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 

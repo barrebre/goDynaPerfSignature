@@ -21,11 +21,8 @@ func TestBuildDeploymentRequest(t *testing.T) {
 
 	tests := []testDefs{
 		testDefs{
-			Name: "Pass - valid params",
-			Values: datatypes.PerformanceSignature{
-				DTEnv:    "",
-				DTServer: "asdf1234.live.dynatrace.com",
-			},
+			Name:       "Pass - valid params",
+			Values:     datatypes.GetValidDefaultPerformanceSignature(),
 			ExpectPass: true,
 		},
 		testDefs{
