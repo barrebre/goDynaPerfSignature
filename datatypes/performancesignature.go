@@ -13,6 +13,13 @@ type PerformanceSignature struct {
 	ServiceID      string
 }
 
+// PerformanceSignatureReturn defines the spec for what needs to be returned to the requester
+type PerformanceSignatureReturn struct {
+	ErrorCode int
+	Error     error
+	Response  []string
+}
+
 //// Example Values
 var (
 	validDefaultPerformanceSignature = PerformanceSignature{

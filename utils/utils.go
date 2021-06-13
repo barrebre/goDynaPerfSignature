@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
-const version = "1.4.7"
+const version = "1.5.0"
 
 // GetConfig retrives the config from the env
 // TODO: optimize this in the future so it doesn't check the getenv each time
@@ -60,11 +61,16 @@ func GetAppVersion() string {
 }
 
 // WriteResponse helps respond to requests
-func WriteResponse(w http.ResponseWriter, responseText string, err error, errCode int) {
+func WriteResponse(w http.ResponseWriter, response datatypes.PerformanceSignatureReturn, ps datatypes.PerformanceSignature) {
+	w.Header().Set("Content-Type", "application/json")
+
+	json, err := json.Marshal(response)
 	if err != nil {
-		w.WriteHeader(errCode) // Not acceptable - closest applicable
-		w.Write([]byte("There was an error: " + err.Error() + "\n"))
-	} else {
-		w.Write([]byte(responseText)) // Header(200)
+		logging.LogError(datatypes.Logging{
+			Message: fmt.Sprintf("Couldn't marshal json for response. Error: %v.", err),
+			PerfSig: ps,
+		})
 	}
+
+	w.Write(json)
 }
