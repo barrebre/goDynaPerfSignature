@@ -20,7 +20,7 @@ var (
 		EvaluationMins: 5,
 		EventAge:       1598818148,
 		Metrics: []Metric{
-			Metric{
+			{
 				ID: "dummy_metric_name:(avg)",
 			},
 		},
@@ -32,7 +32,7 @@ var (
 		EvaluationMins: 5,
 		EventAge:       10234,
 		Metrics: []Metric{
-			Metric{
+			{
 				ID:                "dummy_metric_name:(avg)",
 				RelativeThreshold: 20,
 				ValidationMethod:  "relative",
@@ -46,7 +46,7 @@ var (
 		EvaluationMins: 5,
 		EventAge:       992348,
 		Metrics: []Metric{
-			Metric{
+			{
 				ID:                "dummy_metric_name:(avg)",
 				RelativeThreshold: 0,
 				ValidationMethod:  "relative",
@@ -59,7 +59,7 @@ var (
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
 		Metrics: []Metric{
-			Metric{
+			{
 				ID:               "dummy_metric_name:percentile(90)",
 				StaticThreshold:  1234.1234,
 				ValidationMethod: "static",

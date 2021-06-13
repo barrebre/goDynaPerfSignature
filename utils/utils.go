@@ -9,7 +9,7 @@ import (
 	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
-const version = "1.4.6"
+const version = "1.4.7"
 
 // GetConfig retrives the config from the env
 // TODO: optimize this in the future so it doesn't check the getenv each time
@@ -27,7 +27,7 @@ func GetConfig() datatypes.Config {
 
 	server := os.Getenv("DT_SERVER")
 	if server == "" {
-		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("A Dynatrace server was not provided. Requests will not work unless a DT_SERVER is given in the POST body.")})
+		logging.LogInfo(datatypes.Logging{Message: "A Dynatrace server was not provided. Requests will not work unless a DT_SERVER is given in the POST body."})
 	} else {
 		logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Loaded default DT_SERVER: %v. This can be overridden with any API POST", server)})
 	}
@@ -60,7 +60,7 @@ func GetAppVersion() string {
 }
 
 // WriteResponse helps respond to requests
-func WriteResponse(w http.ResponseWriter, res interface{}, responseText string, err error, errCode int) {
+func WriteResponse(w http.ResponseWriter, responseText string, err error, errCode int) {
 	if err != nil {
 		w.WriteHeader(errCode) // Not acceptable - closest applicable
 		w.Write([]byte("There was an error: " + err.Error() + "\n"))

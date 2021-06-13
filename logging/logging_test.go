@@ -15,11 +15,11 @@ func TestSetLogLevel(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:           "PASS - Nothing set. Default value",
 			ExpectedOutput: "ERROR",
 		},
-		testDefs{
+		{
 			Name:           "PASS - DEBUG set",
 			Input:          "DEBUG",
 			ExpectedOutput: "DEBUG",
@@ -59,7 +59,7 @@ func TestShortenedFileName(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:           "Pass - Expected Value",
 			Value:          "/go/src/github.com/barrebre/goDynaPerfSignature/logging/logging.go",
 			ExpectedReturn: "logging/logging.go",
@@ -82,7 +82,7 @@ func TestShortenedMethodName(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:           "Pass - Expected Value",
 			Value:          "github.com/barrebre/goDynaPerfSignature/logging.Log",
 			ExpectedReturn: "Log",
@@ -99,19 +99,13 @@ func TestShortenedMethodName(t *testing.T) {
 
 // Line is not checked because it will change whenever this file does and file is not checked because it shows local sensitive info
 func TestTraceMethod(t *testing.T) {
-	type values struct {
-		File   string
-		Line   int
-		Method string
-	}
-
 	type testDefs struct {
 		Name           string
 		ExpectedMethod string
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:           "Pass - Expected Value",
 			ExpectedMethod: "github.com/barrebre/goDynaPerfSignature/logging.anon1",
 		},

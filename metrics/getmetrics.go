@@ -20,14 +20,14 @@ func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (d
 	// Get the metrics from the most recent Deployment Event
 	metricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, metricString, ts[0], ps)
 	if err != nil {
-		return datatypes.ComparisonMetrics{}, fmt.Errorf("Error querying current metrics from Dynatrace: %v", err)
+		return datatypes.ComparisonMetrics{}, fmt.Errorf("error querying current metrics from Dynatrace: %v", err)
 	}
 
 	// If there were two Deployment Events, get the second set of metrics
 	if len(ts) == 2 {
 		previousMetricResponse, err := queryMetrics(ps.DTServer, ps.DTEnv, metricString, ts[1], ps)
 		if err != nil {
-			return datatypes.ComparisonMetrics{}, fmt.Errorf("Error querying previous metrics from Dynatrace: %v", err)
+			return datatypes.ComparisonMetrics{}, fmt.Errorf("error querying previous metrics from Dynatrace: %v", err)
 		}
 		var bothMetricSets = datatypes.ComparisonMetrics{
 			CurrentMetrics:  metricResponse,
@@ -85,13 +85,13 @@ func queryMetrics(server string, env string, metricString string, ts datatypes.T
 	defer r.Body.Close()
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not read response body from Dynatrace: %v", err.Error())})
-		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("Could not read response body from Dynatrace: %v", err.Error())
+		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("could not read response body from Dynatrace: %v", err.Error())
 	}
 
 	// Check the status code
 	if r.StatusCode != 200 {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Message is '%v'", r.StatusCode, string(b))})
-		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
+		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 
 	// Try to parse the response into MetricsResponses

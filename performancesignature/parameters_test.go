@@ -28,7 +28,7 @@ func TestReadAndValidateParams(t *testing.T) {
 	invalidJSONNoServices := `{"DTServer":"testserver","DTEnv":"testEnv","APIToken":"S2pMHW_FSlma-PPJIj3l5","Metrics":[{"ID":"builtin:service.response.time:(avg)"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}]}`
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "Pass - valid JSON",
 			Values: values{
 				APIString: []byte(validJSON),
@@ -41,13 +41,13 @@ func TestReadAndValidateParams(t *testing.T) {
 				EvaluationMins: 0,
 				EventAge:       calculateAgeEpoch(180),
 				Metrics: []datatypes.Metric{
-					datatypes.Metric{
+					{
 						ID:                "builtin:service.response.time:(avg)",
 						RelativeThreshold: 0,
 						StaticThreshold:   0,
 						ValidationMethod:  "",
 					},
-					datatypes.Metric{
+					{
 						ID:                "builtin:service.errors.total.rate:(avg)",
 						RelativeThreshold: 0,
 						StaticThreshold:   1,
@@ -58,25 +58,25 @@ func TestReadAndValidateParams(t *testing.T) {
 			},
 			ExpectPass: true,
 		},
-		testDefs{
+		{
 			Name: "Fail - no DTServer provided",
 			Values: values{
 				APIString: []byte(invalidJSONNoServer),
 				Config:    datatypes.Config{},
 			},
 			ExpectPass:    false,
-			ExpectedError: "checkParams - Couldn't validate parameters: There is no DT_SERVER env variable configured and no DTServer was passed with the POST",
+			ExpectedError: "checkParams - Couldn't validate parameters: there is no DT_SERVER env variable configured and no DTServer was passed with the POST",
 		},
-		testDefs{
+		{
 			Name: "Fail - no APIToken provided",
 			Values: values{
 				APIString: []byte(invalidJSONNoAPIToken),
 				Config:    datatypes.Config{},
 			},
 			ExpectPass:    false,
-			ExpectedError: "checkParams - Couldn't validate parameters: There is no DT_API_TOKEN env variable configured and no APIToken was passed with the POST",
+			ExpectedError: "checkParams - Couldn't validate parameters: there is no DT_API_TOKEN env variable configured and no APIToken was passed with the POST",
 		},
-		testDefs{
+		{
 			Name: "PASS - default APIToken configured",
 			Values: values{
 				APIString: []byte(invalidJSONNoAPIToken),
@@ -90,13 +90,13 @@ func TestReadAndValidateParams(t *testing.T) {
 				DTServer:       "testserver",
 				EvaluationMins: 0,
 				Metrics: []datatypes.Metric{
-					datatypes.Metric{
+					{
 						ID:                "builtin:service.response.time:(avg)",
 						RelativeThreshold: 0,
 						StaticThreshold:   0,
 						ValidationMethod:  "",
 					},
-					datatypes.Metric{
+					{
 						ID:                "builtin:service.errors.total.rate:(avg)",
 						RelativeThreshold: 0,
 						StaticThreshold:   1,
@@ -107,25 +107,25 @@ func TestReadAndValidateParams(t *testing.T) {
 			},
 			ExpectPass: true,
 		},
-		testDefs{
+		{
 			Name: "Fail - no metrics provided",
 			Values: values{
 				APIString: []byte(invalidJSONNoMetrics),
 				Config:    datatypes.Config{},
 			},
 			ExpectPass:    false,
-			ExpectedError: "checkParams - Couldn't validate parameters: No Metrics passed with the POST",
+			ExpectedError: "checkParams - Couldn't validate parameters: no Metrics passed with the POST",
 		},
-		testDefs{
+		{
 			Name: "Fail - no services provided",
 			Values: values{
 				APIString: []byte(invalidJSONNoServices),
 				Config:    datatypes.Config{},
 			},
 			ExpectPass:    false,
-			ExpectedError: "checkParams - Couldn't validate parameters: No ServiceID passed with the POST",
+			ExpectedError: "checkParams - Couldn't validate parameters: no ServiceID passed with the POST",
 		},
-		testDefs{
+		{
 			Name: "Fail - invalid JSON",
 			Values: values{
 				APIString: []byte("Byte stream"),

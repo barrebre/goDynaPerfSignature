@@ -15,13 +15,13 @@ func TestCreateMetricString(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "Metric degradation",
 			Input: []datatypes.Metric{
-				datatypes.Metric{
+				{
 					ID: "metric1",
 				},
-				datatypes.Metric{
+				{
 					ID: "metric2",
 				},
 			},
@@ -54,7 +54,7 @@ func TestBuildMetricsQueryURL(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "Query with ENV",
 			Input: inputs{
 				Server:       "myserv",
@@ -65,7 +65,7 @@ func TestBuildMetricsQueryURL(t *testing.T) {
 			},
 			Output: "https://myserv/e/env1234/api/v2/metrics/series/builtin:service.response.time:%28avg%29,builtin:service.errors.total.rate:%28avg%29,?from=1234&resolution=Inf&scope=entity%28asdf%29&to=2345",
 		},
-		testDefs{
+		{
 			Name: "Query without ENV",
 			Input: inputs{
 				Server:       "myserv",

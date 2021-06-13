@@ -20,12 +20,12 @@ func TestBuildDeploymentRequest(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:       "Pass - valid params",
 			Values:     datatypes.GetValidDefaultPerformanceSignature(),
 			ExpectPass: true,
 		},
-		testDefs{
+		{
 			Name: "Pass - valid params with env",
 			Values: datatypes.PerformanceSignature{
 				DTEnv:    "POWEIFJPIOJAPSOIJ",
@@ -33,7 +33,7 @@ func TestBuildDeploymentRequest(t *testing.T) {
 			},
 			ExpectPass: true,
 		},
-		testDefs{
+		{
 			Name: "Fail - couldn't build HTTP request",
 			Values: datatypes.PerformanceSignature{
 				DTEnv:    "",
@@ -67,54 +67,54 @@ func TestCheckPerfSignature(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:            "Valid Default Check Failing Data",
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
 			ExpectedError:   "Metric degradation found: dummy_metric_name:avg degradation of 0.88",
 		},
-		testDefs{
+		{
 			Name:            "Valid Relative Check Failing Data",
 			PerfSignature:   datatypes.GetValidSmallRelativePerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
 			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:avg did not meet the relative threshold criteria. the current performance is 1235.00, which is not better than the previous value of 1234.12 plus the relative threshold of 0.00",
 		},
-		testDefs{
+		{
 			Name:            "Valid Relative Check Passing Data",
 			PerfSignature:   datatypes.GetValidLargeRelativePerformanceSignature(),
 			MetricsResponse: datatypes.GetValidPassingComparisonMetrics(),
 			ExpectPass:      true,
 		},
-		testDefs{
+		{
 			Name:            "Valid Static Check Failing Data",
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
 			ExpectedError:   "Metric degradation found: dummy_metric_name:percentile(90) was above the static threshold: 1235.00, instead of a desired 1234.12",
 		},
-		testDefs{
+		{
 			Name:            "Valid Default Check Passing Data",
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidPassingComparisonMetrics(),
 			ExpectPass:      true,
 		},
-		testDefs{
+		{
 			Name:            "No Data Returned",
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetMissingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "There were no current metrics found for dummy_metric_name:percentile(90)",
+			ExpectedError:   "there were no current metrics found for dummy_metric_name:percentile(90)",
 		},
-		testDefs{
+		{
 			Name:            "No Previous Deployment Data Returned - Default Check",
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetMissingPreviousComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "No previous metrics to compare against for metric dummy_metric_name:avg",
+			ExpectedError:   "no previous metrics to compare against for metric dummy_metric_name:avg",
 		},
-		testDefs{
+		{
 			Name:            "No Previous Deployment Data Returned - Static Check",
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetMissingPreviousComparisonMetrics(),
@@ -143,23 +143,23 @@ func TestPrintDeploymentTimestamps(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "One previous deployment",
 			Values: []datatypes.Timestamps{
-				datatypes.Timestamps{
+				{
 					StartTime: 1574416227,
 					EndTime:   1574419827,
 				},
 			},
 		},
-		testDefs{
+		{
 			Name: "Two previous deployments",
 			Values: []datatypes.Timestamps{
-				datatypes.Timestamps{
+				{
 					StartTime: 1574416227,
 					EndTime:   1574419827,
 				},
-				datatypes.Timestamps{
+				{
 					StartTime: 1574416227,
 					EndTime:   1574419827,
 				},

@@ -24,7 +24,7 @@ func TestGetConfig(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "Env variables set",
 			Values: values{
 				Config: datatypes.Config{
@@ -36,7 +36,7 @@ func TestGetConfig(t *testing.T) {
 			},
 			ExpectPass: true,
 		},
-		testDefs{
+		{
 			Name: "Env variables not set",
 			Values: values{
 				Config: datatypes.Config{

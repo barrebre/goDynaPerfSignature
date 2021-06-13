@@ -38,7 +38,7 @@ var (
 	validFailingComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": MetricValuesArray{
+				"dummy_metric_name:avg": {
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -49,7 +49,7 @@ var (
 						},
 					},
 				},
-				"dummy_metric_name:percentile(90)": MetricValuesArray{
+				"dummy_metric_name:percentile(90)": {
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -64,7 +64,7 @@ var (
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": MetricValuesArray{
+				"dummy_metric_name:avg": {
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -75,7 +75,7 @@ var (
 						},
 					},
 				},
-				"dummy_metric_name:percentile(90)": MetricValuesArray{
+				"dummy_metric_name:percentile(90)": {
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -93,7 +93,7 @@ var (
 	validPassingComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": MetricValuesArray{
+				"dummy_metric_name:avg": {
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -108,7 +108,7 @@ var (
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": MetricValuesArray{
+				"dummy_metric_name:avg": {
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
@@ -135,12 +135,12 @@ var (
 	missingPreviousComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": MetricValuesArray{
+				"dummy_metric_name:avg": {
 					MetricValues: []MetricValues{
 						{},
 					},
 				},
-				"dummy_metric_name:percentile(90)": MetricValuesArray{
+				"dummy_metric_name:percentile(90)": {
 					MetricValues: []MetricValues{
 						{},
 					},
@@ -149,10 +149,10 @@ var (
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
 			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": MetricValuesArray{
+				"dummy_metric_name:avg": {
 					MetricValues: nil,
 				},
-				"dummy_metric_name:percentile(90)": MetricValuesArray{
+				"dummy_metric_name:percentile(90)": {
 					MetricValues: nil,
 				},
 			},

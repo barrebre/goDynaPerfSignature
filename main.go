@@ -17,8 +17,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var config datatypes.Config
-
 // Create the paths to access the APIs
 func main() {
 	logging.LogSystem(datatypes.Logging{Message: fmt.Sprintf("Starting goDynaPerfSig version: %v on port 8080", utils.GetAppVersion())})
@@ -34,14 +32,14 @@ func main() {
 		b, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
 		if err != nil {
-			utils.WriteResponse(w, r, "", err, 400)
+			utils.WriteResponse(w, "", err, 400)
 		}
 
 		// Pull out and verify the provided params
 		ps, err := performancesignature.ReadAndValidateParams(b, config)
 		if err != nil {
 			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams: %v.", err.Error())})
-			utils.WriteResponse(w, r, "", err, 400)
+			utils.WriteResponse(w, "", err, 400)
 			return
 		}
 
@@ -49,11 +47,11 @@ func main() {
 		responseText, errCode, err := performancesignature.ProcessRequest(w, r, ps)
 		if err != nil {
 			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ProcessRequest: %v.", err.Error())})
-			utils.WriteResponse(w, r, "", err, errCode)
+			utils.WriteResponse(w, "", err, errCode)
 			return
 		}
 
-		utils.WriteResponse(w, r, responseText, nil, 0)
+		utils.WriteResponse(w, responseText, nil, 0)
 	})
 
 	srv := &http.Server{
