@@ -29,13 +29,13 @@ func getDeploymentEvents(req http.Request) (datatypes.DeploymentEvents, error) {
 	defer r.Body.Close()
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not read response body from Dynatrace: %v", err.Error())})
-		return datatypes.DeploymentEvents{}, fmt.Errorf("Could not read response body from Dynatrace: %v", err.Error())
+		return datatypes.DeploymentEvents{}, fmt.Errorf("could not read response body from Dynatrace: %v", err.Error())
 	}
 
 	// Check the status code
 	if r.StatusCode != 200 {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Invalid status code from Dynatrace: %v. Body message is '%v'\n", r.StatusCode, string(b))})
-		return datatypes.DeploymentEvents{}, fmt.Errorf("Invalid status code from Dynatrace: %v", r.StatusCode)
+		return datatypes.DeploymentEvents{}, fmt.Errorf("invalid status code from Dynatrace: %v", r.StatusCode)
 	}
 
 	// Try to parse the response into DeploymentEvents
@@ -54,7 +54,7 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 
 	// If there are no deployment events previously, we can still perform static checks
 	if eventsFound == 0 {
-		logging.LogInfo(datatypes.Logging{Message: fmt.Sprint("There haven't been enough deployment events. Auto-passing")})
+		logging.LogInfo(datatypes.Logging{Message: "There haven't been enough deployment events. Auto-passing"})
 		return []datatypes.Timestamps{}, nil
 		// If there is only one deployment event, we can still perform static checks
 	} else if eventsFound == 1 {
@@ -63,7 +63,7 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 		// If there is no evaluation timeframe supplied
 		if mins < 1 {
 			deploymentTimestamp = []datatypes.Timestamps{
-				datatypes.Timestamps{
+				{
 					StartTime: d.Events[0].StartTime,
 					EndTime:   d.Events[0].EndTime,
 				},
@@ -71,7 +71,7 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 		} else {
 			microMins := int64(mins * 60000)
 			deploymentTimestamp = []datatypes.Timestamps{
-				datatypes.Timestamps{
+				{
 					StartTime: d.Events[0].StartTime,
 					EndTime:   d.Events[0].StartTime + microMins,
 				},
@@ -85,11 +85,11 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 		// If there is no evaluation timeframe supplied
 		if mins < 1 {
 			deploymentTimestamps = []datatypes.Timestamps{
-				datatypes.Timestamps{
+				{
 					StartTime: d.Events[0].StartTime,
 					EndTime:   d.Events[0].EndTime,
 				},
-				datatypes.Timestamps{
+				{
 					StartTime: d.Events[1].StartTime,
 					EndTime:   d.Events[1].EndTime,
 				},
@@ -97,11 +97,11 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 		} else {
 			microMins := int64(mins * 60000)
 			deploymentTimestamps = []datatypes.Timestamps{
-				datatypes.Timestamps{
+				{
 					StartTime: d.Events[0].StartTime,
 					EndTime:   d.Events[0].StartTime + microMins,
 				},
-				datatypes.Timestamps{
+				{
 					StartTime: d.Events[1].StartTime,
 					EndTime:   d.Events[1].StartTime + microMins,
 				},
@@ -110,5 +110,5 @@ func parseDeploymentTimestamps(d datatypes.DeploymentEvents, mins int) ([]dataty
 		return deploymentTimestamps, nil
 	}
 
-	return []datatypes.Timestamps{}, fmt.Errorf("Wasn't able to read deployments from Dynatrace")
+	return []datatypes.Timestamps{}, fmt.Errorf("wasn't able to read deployments from Dynatrace")
 }

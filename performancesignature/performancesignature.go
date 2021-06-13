@@ -16,21 +16,21 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	req, err := buildDeploymentRequest(ps)
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error building deployment request: %v.", err)})
-		return "", 503, fmt.Errorf("Error building deployment request: %v", err)
+		return "", 503, fmt.Errorf("error building deployment request: %v", err)
 	}
 
 	// Query Dt for events on the given service
 	deploymentEvents, err := getDeploymentEvents(*req)
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering event timestamps: %v.", err)})
-		return "", 503, fmt.Errorf("Encountered error gathering timestamps: %v", err)
+		return "", 503, fmt.Errorf("encountered error gathering timestamps: %v", err)
 	}
 
 	// Parse those events to determine when the timestamps we should inspect are
 	timestamps, err := parseDeploymentTimestamps(deploymentEvents, ps.EvaluationMins)
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error parsing deployment timestamps: %v.", err)})
-		return "", 503, fmt.Errorf("Error parsing deployment timestamps: %v", err)
+		return "", 503, fmt.Errorf("error parsing deployment timestamps: %v", err)
 	}
 
 	if len(timestamps) == 0 {
@@ -41,7 +41,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	metricsResponse, err := metrics.GetMetrics(ps, timestamps)
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering metrics: %v.", err)})
-		return "", 503, fmt.Errorf("Encountered error gathering metrics: %v", err)
+		return "", 503, fmt.Errorf("encountered error gathering metrics: %v", err)
 	}
 	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Found metrics:\n%v\n", metricsResponse)})
 
@@ -49,7 +49,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	successText, responseCode, err := checkPerfSignature(ps, metricsResponse)
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error occurred when checking performance signature: %v.\n", err)})
-		return "", responseCode, fmt.Errorf("Error occurred when checking performance signature: %v", err)
+		return "", responseCode, fmt.Errorf("error occurred when checking performance signature: %v", err)
 	}
 
 	logging.LogInfo(datatypes.Logging{Message: successText})
@@ -103,7 +103,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 
 		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Current Metrics are: %v.", metricsResponse.CurrentMetrics)})
 		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
-			return "", 400, fmt.Errorf("There were no current metrics found for %v", cleanMetricName)
+			return "", 400, fmt.Errorf("there were no current metrics found for %v", cleanMetricName)
 		}
 		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Value
 
@@ -138,7 +138,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 		default:
 			logging.LogDebug(datatypes.Logging{Message: "Default Check"})
 			if !canCompare {
-				return "", 400, fmt.Errorf("No previous metrics to compare against for metric %v", cleanMetricName)
+				return "", 400, fmt.Errorf("no previous metrics to compare against for metric %v", cleanMetricName)
 			}
 			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues, cleanMetricName)
 			if err != nil {

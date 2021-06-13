@@ -80,19 +80,19 @@ func applyPostParams(params datatypes.PerformanceSignature, finalQuery *datatype
 // Ensure there are no missing parameters to perform a request to Dynatrace
 func validateParams(finalQuery datatypes.PerformanceSignature) error {
 	if finalQuery.APIToken == "" {
-		return fmt.Errorf("There is no DT_API_TOKEN env variable configured and no APIToken was passed with the POST")
+		return fmt.Errorf("there is no DT_API_TOKEN env variable configured and no APIToken was passed with the POST")
 	}
 
 	if finalQuery.DTServer == "" {
-		return fmt.Errorf("There is no DT_SERVER env variable configured and no DTServer was passed with the POST")
+		return fmt.Errorf("there is no DT_SERVER env variable configured and no DTServer was passed with the POST")
 	}
 
 	if len(finalQuery.Metrics) == 0 {
-		return fmt.Errorf("No Metrics passed with the POST")
+		return fmt.Errorf("no Metrics passed with the POST")
 	}
 
 	if finalQuery.ServiceID == "" {
-		return fmt.Errorf("No ServiceID passed with the POST")
+		return fmt.Errorf("no ServiceID passed with the POST")
 	}
 
 	return nil

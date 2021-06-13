@@ -25,12 +25,12 @@ func TestGetDeploymentEvents(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:       "Invalid Endpoint",
 			Values:     *passHTTPReq,
 			ExpectPass: false,
 		},
-		testDefs{
+		{
 			Name:       "Invalid Request",
 			Values:     http.Request{},
 			ExpectPass: false,
@@ -69,12 +69,12 @@ func TestParseDeploymentTimestamps(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name:           "No Deployment Events",
 			ExpectPass:     true,
 			ExpectedResult: []datatypes.Timestamps{},
 		},
-		testDefs{
+		{
 			Name: "One Deployment Event",
 			Values: TestValues{
 				DeploymentEvents: datatypes.GetSingleEventDeploymentEvent(),
@@ -82,7 +82,7 @@ func TestParseDeploymentTimestamps(t *testing.T) {
 			ExpectPass:     true,
 			ExpectedResult: datatypes.GetSingleTimestamps(),
 		},
-		testDefs{
+		{
 			Name: "One Deployment Event with Eval Time set",
 			Values: TestValues{
 				DeploymentEvents: datatypes.GetSingleEventDeploymentEvent(),
@@ -91,7 +91,7 @@ func TestParseDeploymentTimestamps(t *testing.T) {
 			ExpectPass:     false,
 			ExpectedResult: datatypes.GetSingleTimestamps(),
 		},
-		testDefs{
+		{
 			Name: "One Deployment Event with Eval Time set",
 			Values: TestValues{
 				DeploymentEvents: datatypes.GetSingleEventDeploymentEvent(),
@@ -105,7 +105,7 @@ func TestParseDeploymentTimestamps(t *testing.T) {
 				},
 			},
 		},
-		testDefs{
+		{
 			Name: "Two Deployment Events",
 			Values: TestValues{
 				DeploymentEvents: datatypes.GetMultipleEventDeploymentEvent(),
@@ -113,7 +113,7 @@ func TestParseDeploymentTimestamps(t *testing.T) {
 			ExpectPass:     true,
 			ExpectedResult: datatypes.GetMultipleTimestamps(),
 		},
-		testDefs{
+		{
 			Name: "Two Deployment Events with Eval Time Set",
 			Values: TestValues{
 				DeploymentEvents: datatypes.GetMultipleEventDeploymentEvent(),

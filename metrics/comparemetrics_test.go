@@ -21,7 +21,7 @@ func TestCheckRelativeThreshold(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "FAIL - Metric degradation",
 			Values: values{
 				Curr:      1.0,
@@ -31,7 +31,7 @@ func TestCheckRelativeThreshold(t *testing.T) {
 			ExpectPass:    false,
 			ExpectedError: "FAIL - dummy_metric_name:(avg) did not meet the relative threshold criteria. the current performance is 1.00, which is not better than the previous value of 0.00 plus the relative threshold of 0.50",
 		},
-		testDefs{
+		{
 			Name: "PASS - Passed because threshold",
 			Values: values{
 				Curr:      1.0,
@@ -83,7 +83,7 @@ func TestCheckStaticThreshold(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "Metric degradation",
 			Values: values{
 				Metric:    1.0,
@@ -92,7 +92,7 @@ func TestCheckStaticThreshold(t *testing.T) {
 			ExpectPass:    false,
 			ExpectedError: "dummy_metric_name:(avg) was above the static threshold: 1.00, instead of a desired 0.50",
 		},
-		testDefs{
+		{
 			Name: "Successful deploy",
 			Values: values{
 				Metric:    0.0,
@@ -131,7 +131,7 @@ func TestCompareMetrics(t *testing.T) {
 	}
 
 	tests := []testDefs{
-		testDefs{
+		{
 			Name: "Metric degradation",
 			Values: values{
 				Curr: float64(4.0 / 3.0),
@@ -140,7 +140,7 @@ func TestCompareMetrics(t *testing.T) {
 			ExpectPass:    false,
 			ExpectedError: "dummy_metric_name:(avg) degradation of 0.33",
 		},
-		testDefs{
+		{
 			Name: "Successful deploy",
 			Values: values{
 				Curr: 0.0,
