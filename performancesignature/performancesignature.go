@@ -68,7 +68,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	// Ensure the gathered metrics are within the expected perfSignature
 	response := checkPerfSignature(ps, metricsResponse)
 	if response.Error != nil {
-		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error occurred when checking performance signature: %v.\n", response.Error)})
+		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error occurred when checking performance signature: %v.", response.Error)})
 		return datatypes.PerformanceSignatureReturn{
 			ErrorCode: response.ErrorCode,
 			Error:     response.Error,
