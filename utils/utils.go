@@ -63,7 +63,9 @@ func GetAppVersion() string {
 // WriteResponse helps respond to requests
 func WriteResponse(w http.ResponseWriter, response datatypes.PerformanceSignatureReturn, ps datatypes.PerformanceSignature) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.ErrorCode)
+	if response.ErrorCode != 0 {
+		w.WriteHeader(response.ErrorCode)
+	}
 
 	responseJson, err := json.Marshal(response)
 	if err != nil {
