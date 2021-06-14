@@ -63,14 +63,32 @@ func GetAppVersion() string {
 // WriteResponse helps respond to requests
 func WriteResponse(w http.ResponseWriter, response datatypes.PerformanceSignatureReturn, ps datatypes.PerformanceSignature) {
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.ErrorCode)
 
-	json, err := json.Marshal(response)
+	responseJson, err := json.Marshal(response)
 	if err != nil {
 		logging.LogError(datatypes.Logging{
 			Message: fmt.Sprintf("Couldn't marshal json for response. Error: %v.", err),
 			PerfSig: ps,
 		})
+
+		w.WriteHeader(513)
+		marshalErrorJson := datatypes.PerformanceSignatureReturn{
+			ErrorCode: 513,
+			Error:     fmt.Sprintf("goDynaPerfSignature internal problem sending the response. The message was supposed to be: %v", response.Response),
+			Response:  []string{},
+		}
+
+		errorJson, err2 := json.Marshal(marshalErrorJson)
+		if err2 != nil {
+			logging.LogError(datatypes.Logging{
+				Message: fmt.Sprintf("Couldn't marshal failure json for response. Error: %v.", err2),
+				PerfSig: ps,
+			})
+		}
+		w.Write(errorJson)
+		return
 	}
 
-	w.Write(json)
+	w.Write(responseJson)
 }

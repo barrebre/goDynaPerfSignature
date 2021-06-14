@@ -72,7 +72,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: dummy_metric_name:avg degradation of 0.88",
+			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:avg had a degradation of 0.88, from 1234.12 to 1235.00",
 		},
 		{
 			Name:            "Valid Relative Check Failing Data",
@@ -92,7 +92,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: dummy_metric_name:percentile(90) was above the static threshold: 1235.00, instead of a desired 1234.12",
+			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:percentile(90) was above the static threshold: 1235.00, instead of a desired 1234.12",
 		},
 		{
 			Name:            "Valid Default Check Passing Data",
@@ -127,9 +127,9 @@ func TestCheckPerfSignature(t *testing.T) {
 			response := checkPerfSignature(test.PerfSignature, test.MetricsResponse)
 
 			if test.ExpectPass == true {
-				assert.NoError(t, response.Error)
+				assert.Equal(t, "", response.Error)
 			} else {
-				assert.EqualError(t, response.Error, test.ExpectedError)
+				assert.Equal(t, response.Error, test.ExpectedError)
 			}
 		})
 	}

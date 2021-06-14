@@ -18,7 +18,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error building deployment request: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
 			ErrorCode: 503,
-			Error:     err,
+			Error:     err.Error(),
 			Response:  []string{"Error building deployment request"},
 		}
 	}
@@ -29,7 +29,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering event timestamps: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
 			ErrorCode: 503,
-			Error:     err,
+			Error:     err.Error(),
 			Response:  []string{"Encountered error gathering event timestamps"},
 		}
 	}
@@ -40,7 +40,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error parsing deployment timestamps: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
 			ErrorCode: 503,
-			Error:     err,
+			Error:     err.Error(),
 			Response:  []string{"Error parsing deployment timestamps"},
 		}
 	}
@@ -48,7 +48,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	if len(timestamps) == 0 {
 		return datatypes.PerformanceSignatureReturn{
 			ErrorCode: 200,
-			Error:     nil,
+			Error:     "",
 			Response:  []string{"No deployment events found. Automatic pass"},
 		}
 	}
@@ -59,7 +59,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering metrics: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
 			ErrorCode: 503,
-			Error:     err,
+			Error:     err.Error(),
 			Response:  []string{"Encountered error gathering metrics"},
 		}
 	}
@@ -67,7 +67,7 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 
 	// Ensure the gathered metrics are within the expected perfSignature
 	response := checkPerfSignature(ps, metricsResponse)
-	if response.Error != nil {
+	if response.Error != "" {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error occurred when checking performance signature: %v.", response.Error)})
 		return datatypes.PerformanceSignatureReturn{
 			ErrorCode: response.ErrorCode,
@@ -129,7 +129,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
 			return datatypes.PerformanceSignatureReturn{
 				ErrorCode: 400,
-				Error:     fmt.Errorf("there were no current metrics found for %v", cleanMetricName),
+				Error:     fmt.Sprintf("there were no current metrics found for %v", cleanMetricName),
 			}
 		}
 		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Value
@@ -152,7 +152,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 				logging.LogInfo(datatypes.Logging{Message: degradationText})
 				return datatypes.PerformanceSignatureReturn{
 					ErrorCode: 406,
-					Error:     fmt.Errorf(degradationText),
+					Error:     degradationText,
 				}
 			}
 			successText = append(successText, response)
@@ -164,7 +164,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 				logging.LogInfo(datatypes.Logging{Message: degradationText})
 				return datatypes.PerformanceSignatureReturn{
 					ErrorCode: 406,
-					Error:     fmt.Errorf(degradationText),
+					Error:     degradationText,
 				}
 			}
 			successText = append(successText, response)
@@ -173,7 +173,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 			if !canCompare {
 				return datatypes.PerformanceSignatureReturn{
 					ErrorCode: 400,
-					Error:     fmt.Errorf("no previous metrics to compare against for metric %v", cleanMetricName),
+					Error:     fmt.Sprintf("no previous metrics to compare against for metric %v", cleanMetricName),
 				}
 			}
 			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues, cleanMetricName)
@@ -182,7 +182,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 				logging.LogInfo(datatypes.Logging{Message: degradationText})
 				return datatypes.PerformanceSignatureReturn{
 					ErrorCode: 406,
-					Error:     fmt.Errorf(degradationText),
+					Error:     degradationText,
 				}
 			}
 			successText = append(successText, response)
@@ -190,7 +190,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 	}
 	return datatypes.PerformanceSignatureReturn{
 		ErrorCode: 0,
-		Error:     nil,
+		Error:     "",
 		Response:  successText,
 	}
 }

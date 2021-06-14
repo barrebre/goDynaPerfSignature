@@ -16,7 +16,7 @@ type PerformanceSignature struct {
 // PerformanceSignatureReturn defines the spec for what needs to be returned to the requester
 type PerformanceSignatureReturn struct {
 	ErrorCode int
-	Error     error
+	Error     string
 	Response  []string
 }
 
@@ -74,10 +74,21 @@ var (
 		},
 		ServiceID: "asdf",
 	}
+
+	validPerformanceSignatureReturnSuccess = PerformanceSignatureReturn{
+		ErrorCode: 0,
+		Error:     "",
+		Response:  []string{"PASS - builtin:service.response.time:avg improvement to 82122.06 from 150879.00. (Difference: -68756.94)"},
+	}
+
+	validPerformanceSignatureReturnFailure = PerformanceSignatureReturn{
+		ErrorCode: 406,
+		Error:     "Metric degradation found: ",
+		Response:  []string{},
+	}
 )
 
 //// Example Accessors
-
 // GetValidDefaultPerformanceSignature returns a valid PerformanceSignature with default checks
 func GetValidDefaultPerformanceSignature() PerformanceSignature {
 	return validDefaultPerformanceSignature
@@ -96,4 +107,14 @@ func GetValidSmallRelativePerformanceSignature() PerformanceSignature {
 // GetValidStaticPerformanceSignature returns a valid PerformanceSignature with a static check
 func GetValidStaticPerformanceSignature() PerformanceSignature {
 	return validStaticPerformanceSignature
+}
+
+// GetValidPerformanceSignatureReturnSuccess returns a PerformanceSignatureReturn that passed
+func GetValidPerformanceSignatureReturnSuccess() PerformanceSignatureReturn {
+	return validPerformanceSignatureReturnSuccess
+}
+
+// GetValidPerformanceSignatureReturnFailure returns a PerformanceSignatureReturn that failed
+func GetValidPerformanceSignatureReturnFailure() PerformanceSignatureReturn {
+	return validPerformanceSignatureReturnFailure
 }

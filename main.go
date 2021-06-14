@@ -35,7 +35,7 @@ func main() {
 			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Couldn't parse the body of the request: %v.", err.Error())})
 			response := datatypes.PerformanceSignatureReturn{
 				ErrorCode: 400,
-				Error:     err,
+				Error:     err.Error(),
 				Response:  []string{"Couldn't parse the body of the request"},
 			}
 			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
@@ -48,7 +48,7 @@ func main() {
 			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams: %v.", err.Error())})
 			response := datatypes.PerformanceSignatureReturn{
 				ErrorCode: 400,
-				Error:     err,
+				Error:     err.Error(),
 				Response:  []string{"Could not ReadAndValidateParams"},
 			}
 			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
