@@ -1,10 +1,14 @@
 package utils
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http/httptest"
 	"os"
 	"testing"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
+	"github.com/stretchr/testify/assert"
 )
 
 // TODO: Rewrite these tests so they validate the data provided is set in the config. There are no errors to be thrown
@@ -70,6 +74,49 @@ func TestGetConfig(t *testing.T) {
 			}
 
 			GetConfig()
+		})
+	}
+}
+
+func TestWriteResponse(t *testing.T) {
+	type testDefs struct {
+		Name                       string
+		ExpectedCode               int
+		ExpectedReturnError        string
+		PerformanceSignatureReturn datatypes.PerformanceSignatureReturn
+	}
+
+	tests := []testDefs{
+		{
+			Name:                       "Successful deployment",
+			ExpectedCode:               200,
+			ExpectedReturnError:        "",
+			PerformanceSignatureReturn: datatypes.GetValidPerformanceSignatureReturnSuccess(),
+		},
+		{
+			Name:                       "Failure deployment",
+			ExpectedCode:               406,
+			ExpectedReturnError:        "Metric degradation found: ",
+			PerformanceSignatureReturn: datatypes.GetValidPerformanceSignatureReturnFailure(),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			WriteResponse(w, test.PerformanceSignatureReturn, datatypes.GetValidDefaultPerformanceSignature())
+
+			resp := w.Result()
+			body, _ := ioutil.ReadAll(resp.Body)
+
+			var responseBody datatypes.PerformanceSignatureReturn
+			json.Unmarshal(body, &responseBody)
+
+			assert.Equal(t, test.ExpectedCode, resp.StatusCode)
+			if test.ExpectedReturnError != "" {
+				assert.Equal(t, test.ExpectedReturnError, responseBody.Error)
+			}
+
 		})
 	}
 }

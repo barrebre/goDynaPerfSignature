@@ -72,14 +72,14 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: dummy_metric_name:avg degradation of 0.88",
+			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:avg had a degradation of 0.88, from 1234.12 to 1235.00",
 		},
 		{
 			Name:            "Valid Relative Check Failing Data",
 			PerfSignature:   datatypes.GetValidSmallRelativePerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:avg did not meet the relative threshold criteria. the current performance is 1235.00, which is not better than the previous value of 1234.12 plus the relative threshold of 0.00",
+			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:avg did not meet the relative threshold criteria. the current performance is 1235.00, which is not better than the previous value of 1234.12 plus the relative threshold of 0.00.",
 		},
 		{
 			Name:            "Valid Relative Check Passing Data",
@@ -92,7 +92,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			PerfSignature:   datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse: datatypes.GetValidFailingComparisonMetrics(),
 			ExpectPass:      false,
-			ExpectedError:   "Metric degradation found: dummy_metric_name:percentile(90) was above the static threshold: 1235.00, instead of a desired 1234.12",
+			ExpectedError:   "Metric degradation found: FAIL - dummy_metric_name:percentile(90) was above the static threshold: 1235.00, instead of a desired 1234.12",
 		},
 		{
 			Name:            "Valid Default Check Passing Data",
@@ -124,12 +124,12 @@ func TestCheckPerfSignature(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			_, _, err := checkPerfSignature(test.PerfSignature, test.MetricsResponse)
+			response := checkPerfSignature(test.PerfSignature, test.MetricsResponse)
 
 			if test.ExpectPass == true {
-				assert.NoError(t, err)
+				assert.Equal(t, "", response.Error)
 			} else {
-				assert.EqualError(t, err, test.ExpectedError)
+				assert.Equal(t, response.Error, test.ExpectedError)
 			}
 		})
 	}

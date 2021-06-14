@@ -32,26 +32,33 @@ func main() {
 		b, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
 		if err != nil {
-			utils.WriteResponse(w, "", err, 400)
+			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Couldn't parse the body of the request. Error was: %v.", err.Error())})
+			response := datatypes.PerformanceSignatureReturn{
+				ErrorCode: 400,
+				Error:     err.Error(),
+				Response:  []string{"Couldn't parse the body of the request"},
+			}
+			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
+			return
 		}
 
 		// Pull out and verify the provided params
 		ps, err := performancesignature.ReadAndValidateParams(b, config)
 		if err != nil {
-			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams: %v.", err.Error())})
-			utils.WriteResponse(w, "", err, 400)
+			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams. Error was: %v.", err.Error())})
+			response := datatypes.PerformanceSignatureReturn{
+				ErrorCode: 400,
+				Error:     err.Error(),
+				Response:  []string{"Could not read or validate given parameters"},
+			}
+			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
 			return
 		}
 
 		// Perform the performance signature
-		responseText, errCode, err := performancesignature.ProcessRequest(w, r, ps)
-		if err != nil {
-			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ProcessRequest: %v.", err.Error())})
-			utils.WriteResponse(w, "", err, errCode)
-			return
-		}
+		response := performancesignature.ProcessRequest(w, r, ps)
 
-		utils.WriteResponse(w, responseText, nil, 0)
+		utils.WriteResponse(w, response, ps)
 	})
 
 	srv := &http.Server{
