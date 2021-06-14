@@ -32,7 +32,7 @@ func main() {
 		b, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
 		if err != nil {
-			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Couldn't parse the body of the request: %v.", err.Error())})
+			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Couldn't parse the body of the request. Error was: %v.", err.Error())})
 			response := datatypes.PerformanceSignatureReturn{
 				ErrorCode: 400,
 				Error:     err.Error(),
@@ -45,11 +45,11 @@ func main() {
 		// Pull out and verify the provided params
 		ps, err := performancesignature.ReadAndValidateParams(b, config)
 		if err != nil {
-			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams: %v.", err.Error())})
+			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams. Error was: %v.", err.Error())})
 			response := datatypes.PerformanceSignatureReturn{
 				ErrorCode: 400,
 				Error:     err.Error(),
-				Response:  []string{"Could not ReadAndValidateParams"},
+				Response:  []string{"Could not read or validate given parameters"},
 			}
 			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
 			return
