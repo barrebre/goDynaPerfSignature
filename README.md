@@ -53,6 +53,12 @@ Below are the required parameters to query goDynaPerfSignature:
 * **EvaluationMins** - If you would rather provide an evaluation timeframe than use the duration of Deployment Events, provide a number of minutes in this field. goDynaPerfSignature will evaluate metrics from the beginning of the discovered Deployment Events for the EvaluationMinutes duration. *Ex*: `5`
 * **EventAge** - Set the number of days to look for Events pushed to the Events API. Use this in case you haven't pushed a new event in the last 30 days, which is the default timeframe Dynatrace queries for. *Ex*: `180`
 
+## Returned Parameters
+Upon calling goDynaPerfSignature, the app will return a JSON payload with the following details:
+* **Error** - `True`/`False` - Was there an error processing the request? This could be reading from Dynatrace, building requests, or parsing returned data
+* **Pass** - `True`/`False` - Was this a successful deployment? If all criteria was met, this will return `true`
+* **Response** - `String` - Whether there was an error, a pass, or a fail, the Response will describe the reasoning for T/F in the Error and Pass fields
+
 ## Examples
 This example queries two different metrics:
 ```
