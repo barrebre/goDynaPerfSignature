@@ -34,9 +34,8 @@ func main() {
 		if err != nil {
 			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Couldn't parse the body of the request. Error was: %v.", err.Error())})
 			response := datatypes.PerformanceSignatureReturn{
-				ErrorCode: 400,
-				Error:     err.Error(),
-				Response:  []string{"Couldn't parse the body of the request"},
+				Error:    true,
+				Response: []string{"Couldn't parse the body of the request"},
 			}
 			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
 			return
@@ -47,9 +46,8 @@ func main() {
 		if err != nil {
 			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams. Error was: %v.", err.Error())})
 			response := datatypes.PerformanceSignatureReturn{
-				ErrorCode: 400,
-				Error:     err.Error(),
-				Response:  []string{"Could not read or validate given parameters"},
+				Error:    true,
+				Response: []string{"Could not read or validate given parameters"},
 			}
 			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
 			return

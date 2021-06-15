@@ -17,9 +17,8 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error building deployment request: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
-			ErrorCode: 503,
-			Error:     err.Error(),
-			Response:  []string{"Error building deployment request"},
+			Error:    true,
+			Response: []string{"Internal error building deployment request"},
 		}
 	}
 
@@ -28,9 +27,8 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering event timestamps: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
-			ErrorCode: 503,
-			Error:     err.Error(),
-			Response:  []string{"Encountered error gathering event timestamps"},
+			Error:    true,
+			Response: []string{"Encountered error gathering event timestamps from Dynatrace"},
 		}
 	}
 
@@ -39,17 +37,16 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error parsing deployment timestamps: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
-			ErrorCode: 503,
-			Error:     err.Error(),
-			Response:  []string{"Error parsing deployment timestamps"},
+			Error:    true,
+			Response: []string{"Error parsing deployment timestamps"},
 		}
 	}
 
 	if len(timestamps) == 0 {
 		return datatypes.PerformanceSignatureReturn{
-			ErrorCode: 200,
-			Error:     "",
-			Response:  []string{"No deployment events found. Automatic pass"},
+			Error:    false,
+			Pass:     true,
+			Response: []string{"No deployment events found. Automatic pass"},
 		}
 	}
 
@@ -58,25 +55,23 @@ func ProcessRequest(w http.ResponseWriter, r *http.Request, ps datatypes.Perform
 	if err != nil {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Encountered error gathering metrics: %v.", err)})
 		return datatypes.PerformanceSignatureReturn{
-			ErrorCode: 503,
-			Error:     err.Error(),
-			Response:  []string{"Encountered error gathering metrics"},
+			Error:    true,
+			Response: []string{"Encountered error gathering metrics"},
 		}
 	}
 	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Found metrics:\n%v\n", metricsResponse)})
 
 	// Ensure the gathered metrics are within the expected perfSignature
 	response := checkPerfSignature(ps, metricsResponse)
-	if response.Error != "" {
+	if response.Error {
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Error occurred when checking performance signature: %v.", response.Error)})
 		return datatypes.PerformanceSignatureReturn{
-			ErrorCode: response.ErrorCode,
-			Error:     response.Error,
-			Response:  []string{"Error occurred when checking performance signature"},
+			Error:    true,
+			Response: []string{fmt.Sprintf("Error occurred when checking performance signature: %v", err)},
 		}
 	}
 
-	logging.LogInfo(datatypes.Logging{Message: strings.Join(response.Response, " ")})
+	logging.LogInfo(datatypes.Logging{Message: strings.Join(response.Response, "; ")})
 	return response
 }
 
@@ -112,7 +107,10 @@ func buildDeploymentRequest(ps datatypes.PerformanceSignature) (*http.Request, e
 
 // For each metric, perform its checks
 func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, metricsResponse datatypes.ComparisonMetrics) datatypes.PerformanceSignatureReturn {
-	var successText []string
+	// Create the return object, which defaults to a pass
+	result := datatypes.PerformanceSignatureReturn{
+		Pass: true,
+	}
 	for _, metric := range performanceSignature.Metrics {
 		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Looking at metric %v", metric)})
 
@@ -128,8 +126,8 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Current Metrics are: %v.", metricsResponse.CurrentMetrics)})
 		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
 			return datatypes.PerformanceSignatureReturn{
-				ErrorCode: 400,
-				Error:     fmt.Sprintf("there were no current metrics found for %v", cleanMetricName),
+				Pass:     false,
+				Response: []string{fmt.Sprintf("there were no current metrics found for %v", cleanMetricName)},
 			}
 		}
 		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Value
@@ -150,47 +148,39 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
 				logging.LogInfo(datatypes.Logging{Message: degradationText})
-				return datatypes.PerformanceSignatureReturn{
-					ErrorCode: 406,
-					Error:     degradationText,
-				}
+				result.Response = append(result.Response, degradationText)
+				result.Pass = false
+			} else {
+				result.Response = append(result.Response, response)
 			}
-			successText = append(successText, response)
 		case "static":
 			logging.LogDebug(datatypes.Logging{Message: "Static Check"})
 			response, err := metrics.CheckStaticThreshold(currentMetricValues, metric.StaticThreshold, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
 				logging.LogInfo(datatypes.Logging{Message: degradationText})
-				return datatypes.PerformanceSignatureReturn{
-					ErrorCode: 406,
-					Error:     degradationText,
-				}
+				result.Response = append(result.Response, degradationText)
+				result.Pass = false
+			} else {
+				result.Response = append(result.Response, response)
 			}
-			successText = append(successText, response)
 		default:
 			logging.LogDebug(datatypes.Logging{Message: "Default Check"})
 			if !canCompare {
-				return datatypes.PerformanceSignatureReturn{
-					ErrorCode: 400,
-					Error:     fmt.Sprintf("no previous metrics to compare against for metric %v", cleanMetricName),
+				degradationText := fmt.Sprintf("No previous metrics to compare against for metric %v", cleanMetricName)
+				result.Response = append(result.Response, degradationText)
+			} else {
+				response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues, cleanMetricName)
+				if err != nil {
+					degradationText := fmt.Sprintf("Metric degradation found: %v", err)
+					logging.LogInfo(datatypes.Logging{Message: degradationText})
+					result.Response = append(result.Response, degradationText)
+					result.Pass = false
+				} else {
+					result.Response = append(result.Response, response)
 				}
 			}
-			response, err := metrics.CompareMetrics(currentMetricValues, previousMetricValues, cleanMetricName)
-			if err != nil {
-				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
-				logging.LogInfo(datatypes.Logging{Message: degradationText})
-				return datatypes.PerformanceSignatureReturn{
-					ErrorCode: 406,
-					Error:     degradationText,
-				}
-			}
-			successText = append(successText, response)
 		}
 	}
-	return datatypes.PerformanceSignatureReturn{
-		ErrorCode: 0,
-		Error:     "",
-		Response:  successText,
-	}
+	return result
 }

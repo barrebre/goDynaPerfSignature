@@ -15,9 +15,9 @@ type PerformanceSignature struct {
 
 // PerformanceSignatureReturn defines the spec for what needs to be returned to the requester
 type PerformanceSignatureReturn struct {
-	ErrorCode int
-	Error     string
-	Response  []string
+	Error    bool
+	Pass     bool
+	Response []string
 }
 
 //// Example Values
@@ -76,15 +76,14 @@ var (
 	}
 
 	validPerformanceSignatureReturnSuccess = PerformanceSignatureReturn{
-		ErrorCode: 0,
-		Error:     "",
-		Response:  []string{"PASS - builtin:service.response.time:avg improvement to 82122.06 from 150879.00. (Difference: -68756.94)"},
+		Error:    false,
+		Pass:     true,
+		Response: []string{"PASS - builtin:service.response.time:avg improvement to 82122.06 from 150879.00. (Difference: -68756.94)"},
 	}
 
 	validPerformanceSignatureReturnFailure = PerformanceSignatureReturn{
-		ErrorCode: 406,
-		Error:     "Metric degradation found: ",
-		Response:  []string{},
+		Pass:     false,
+		Response: []string{"Metric degradation found: "},
 	}
 )
 

@@ -10,7 +10,7 @@ import (
 	"github.com/barrebre/goDynaPerfSignature/logging"
 )
 
-const version = "1.5.0"
+const version = "1.6.0"
 
 // GetConfig retrives the config from the env
 // TODO: optimize this in the future so it doesn't check the getenv each time
@@ -63,8 +63,10 @@ func GetAppVersion() string {
 // WriteResponse helps respond to requests
 func WriteResponse(w http.ResponseWriter, response datatypes.PerformanceSignatureReturn, ps datatypes.PerformanceSignature) {
 	w.Header().Set("Content-Type", "application/json")
-	if response.ErrorCode != 0 {
-		w.WriteHeader(response.ErrorCode)
+	if response.Error {
+		w.WriteHeader(503)
+	} else if !response.Pass {
+		w.WriteHeader(406)
 	}
 
 	responseJson, err := json.Marshal(response)
@@ -76,9 +78,8 @@ func WriteResponse(w http.ResponseWriter, response datatypes.PerformanceSignatur
 
 		w.WriteHeader(513)
 		marshalErrorJson := datatypes.PerformanceSignatureReturn{
-			ErrorCode: 513,
-			Error:     fmt.Sprintf("goDynaPerfSignature internal problem sending the response. The message was supposed to be: %v", response.Response),
-			Response:  []string{},
+			Error:    true,
+			Response: []string{fmt.Sprintf("goDynaPerfSignature internal problem sending the response. The message was supposed to be: %v", response.Response)},
 		}
 
 		errorJson, err2 := json.Marshal(marshalErrorJson)
