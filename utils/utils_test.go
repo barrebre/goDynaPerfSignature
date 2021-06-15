@@ -82,7 +82,7 @@ func TestWriteResponse(t *testing.T) {
 	type testDefs struct {
 		Name                       string
 		ExpectedCode               int
-		ExpectedReturnError        string
+		ExpectedResponse           []string
 		PerformanceSignatureReturn datatypes.PerformanceSignatureReturn
 	}
 
@@ -90,13 +90,13 @@ func TestWriteResponse(t *testing.T) {
 		{
 			Name:                       "Successful deployment",
 			ExpectedCode:               200,
-			ExpectedReturnError:        "",
+			ExpectedResponse:           []string{"PASS - builtin:service.response.time:avg improvement to 82122.06 from 150879.00. (Difference: -68756.94)"},
 			PerformanceSignatureReturn: datatypes.GetValidPerformanceSignatureReturnSuccess(),
 		},
 		{
 			Name:                       "Failure deployment",
 			ExpectedCode:               406,
-			ExpectedReturnError:        "Metric degradation found: ",
+			ExpectedResponse:           []string{"Metric degradation found: "},
 			PerformanceSignatureReturn: datatypes.GetValidPerformanceSignatureReturnFailure(),
 		},
 	}
@@ -113,9 +113,7 @@ func TestWriteResponse(t *testing.T) {
 			json.Unmarshal(body, &responseBody)
 
 			assert.Equal(t, test.ExpectedCode, resp.StatusCode)
-			if test.ExpectedReturnError != "" {
-				assert.Equal(t, test.ExpectedReturnError, responseBody.Error)
-			}
+			assert.Equal(t, test.ExpectedResponse, responseBody.Response)
 
 		})
 	}
