@@ -2,12 +2,14 @@ package performancesignature
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
 	"github.com/barrebre/goDynaPerfSignature/datatypes"
 	"github.com/barrebre/goDynaPerfSignature/logging"
 	"github.com/barrebre/goDynaPerfSignature/metrics"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // ProcessRequest handles requests we receive to /performanceSignature
@@ -111,6 +113,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 	result := datatypes.PerformanceSignatureReturn{
 		Pass: true,
 	}
+	log.Println(spew.Sdump(metricsResponse))
 	for _, metric := range performanceSignature.Metrics {
 		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Looking at metric %v", metric)})
 
@@ -130,7 +133,16 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 				Response: []string{fmt.Sprintf("there were no current metrics found for %v", cleanMetricName)},
 			}
 		}
-		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Value
+
+		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Values) < 1 {
+			fmt.Println(metricsResponse.CurrentMetrics.Metrics[cleanMetricName])
+			fmt.Println(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0])
+			return datatypes.PerformanceSignatureReturn{
+				Pass:     false,
+				Response: []string{fmt.Sprintf("there were no current 2 metrics found for %v", cleanMetricName)},
+			}
+		}
+		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Values[0]
 
 		// This is only an issue if trying a comparison
 		canCompare := true
@@ -138,7 +150,11 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 		if len(metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
 			canCompare = false
 		} else {
-			previousMetricValues = metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Value
+			if len(metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Values) < 1 {
+				canCompare = false
+			} else {
+				previousMetricValues = metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Values[0]
+			}
 		}
 
 		switch checkCounts := metric.ValidationMethod; checkCounts {

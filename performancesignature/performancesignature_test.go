@@ -112,7 +112,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			Name:             "No Previous Deployment Data Returned - Static Check",
 			PerfSignature:    datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse:  datatypes.GetMissingPreviousComparisonMetrics(),
-			ExpectedResponse: []string{"PASS - dummy_metric_name:percentile(90) fit static threshold of 1234.12 with value 0.00."},
+			ExpectedResponse: []string{"PASS - dummy_metric_name:percentile(90) fit static threshold of 1234.12 with value 12.34."},
 		},
 	}
 

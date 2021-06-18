@@ -87,6 +87,7 @@ func queryMetrics(server string, env string, metricString string, ts datatypes.T
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not read response body from Dynatrace: %v", err.Error())})
 		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("could not read response body from Dynatrace: %v", err.Error())
 	}
+	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Full response from Dynatrace is: %v.", string(b))})
 
 	// Check the status code
 	if r.StatusCode != 200 {
@@ -112,19 +113,25 @@ func buildMetricsQueryURL(server string, env string, metricString string, ts dat
 	}
 
 	q := newURL.Query()
+	q.Set("metricSelector", metricString)
 	q.Set("resolution", "Inf")
 	q.Set("from", fmt.Sprint(ts.StartTime))
 	q.Set("to", fmt.Sprint(ts.EndTime))
-	q.Set("scope", fmt.Sprintf("entity(%v)", ps.ServiceID))
+	q.Set("entitySelector", fmt.Sprintf("entityId(\"%v\")", ps.ServiceID))
 	newURL.RawQuery = q.Encode()
 
 	// Check if there's a Dynatrace environment specified
 	if env == "" {
-		newURL.Path = fmt.Sprintf("api/v2/metrics/series/%v", metricString)
+		newURL.Path = "api/v2/metrics/query"
 	} else {
-		newURL.Path = fmt.Sprintf("/e/%v/api/v2/metrics/series/%v", env, metricString)
+		newURL.Path = fmt.Sprintf("/e/%v/api/v2/metrics/query", env)
 	}
 	logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Built URL: %v", newURL.String())})
 
 	return newURL.String()
 }
+
+//"https://hfn13693.live.dynatrace.com/api/v2/metrics/query
+// ?metricSelector=builtin%3Aservice.response.time%3Apercentile%2890%29
+// &resolution=Inf
+// &entitySelector=entityId%28%22SERVICE-SERVICE-%22%29"
