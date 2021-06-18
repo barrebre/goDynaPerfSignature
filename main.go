@@ -17,6 +17,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const badRequestMessage = "Please ensure your request meets the required specifications found in the readme: https://github.com/barrebre/goDynaPerfSignature#required-parameters"
+
 // Create the paths to access the APIs
 func main() {
 	logging.LogSystem(datatypes.Logging{Message: fmt.Sprintf("Starting goDynaPerfSig version: %v on port 8080", utils.GetAppVersion())})
@@ -32,10 +34,11 @@ func main() {
 		b, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
 		if err != nil {
-			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Couldn't parse the body of the request. Error was: %v.", err.Error())})
+			errMessage := fmt.Sprintf("Couldn't parse the body of the request. Error was: %v.", err.Error())
+			logging.LogError(datatypes.Logging{Message: errMessage})
 			response := datatypes.PerformanceSignatureReturn{
 				Error:    true,
-				Response: []string{"Couldn't parse the body of the request"},
+				Response: []string{errMessage, badRequestMessage},
 			}
 			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
 			return
@@ -44,10 +47,11 @@ func main() {
 		// Pull out and verify the provided params
 		ps, err := performancesignature.ReadAndValidateParams(b, config)
 		if err != nil {
-			logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not ReadAndValidateParams. Error was: %v.", err.Error())})
+			errMessage := fmt.Sprintf("Could not ReadAndValidateParams. Error was: %v.", err.Error())
+			logging.LogError(datatypes.Logging{Message: errMessage})
 			response := datatypes.PerformanceSignatureReturn{
 				Error:    true,
-				Response: []string{"Could not read or validate given parameters"},
+				Response: []string{errMessage, badRequestMessage},
 			}
 			utils.WriteResponse(w, response, datatypes.PerformanceSignature{})
 			return
