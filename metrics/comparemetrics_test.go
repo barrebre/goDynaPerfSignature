@@ -22,17 +22,17 @@ func TestCheckRelativeThreshold(t *testing.T) {
 
 	tests := []testDefs{
 		{
-			Name: "FAIL - Metric degradation",
+			Name: "Relative Threshold - FAIL",
 			Values: values{
 				Curr:      1.0,
 				Prev:      0.0,
 				Threshold: 0.5,
 			},
 			ExpectPass:    false,
-			ExpectedError: "FAIL - dummy_metric_name:(avg) did not meet the relative threshold criteria. the current performance is 1.00, which is not better than the previous value of 0.00 plus the relative threshold of 0.50.",
+			ExpectedError: "FAIL - dummy_metric_name:(avg) did not meet the relative threshold criteria. The current performance is 1.00, which is not better than the previous value (0.00) plus the relative threshold (0.50).",
 		},
 		{
-			Name: "PASS - Passed because threshold",
+			Name: "Relative Threshold - PASS - Passed because threshold",
 			Values: values{
 				Curr:      1.0,
 				Prev:      0.0,
@@ -42,14 +42,14 @@ func TestCheckRelativeThreshold(t *testing.T) {
 			ExpectedText: "PASS - dummy_metric_name:(avg)'s current value is 1.00, which is passable compared to the previous results (0.00) plus the tolerance (2.00).",
 		},
 		{
-			Name: "PASS - Passed without threshold",
+			Name: "Relative Threshold - PASS - Passed without threshold",
 			Values: values{
 				Curr:      1.0,
 				Prev:      5.0,
 				Threshold: 0.5,
 			},
 			ExpectPass:   true,
-			ExpectedText: "PASS - dummy_metric_name:(avg) improvement to 1.00 from 5.00. (Difference: -4.00)",
+			ExpectedText: "PASS - dummy_metric_name:(avg) had an improvement of 4.00, from 5.00 to 1.00",
 		},
 	}
 
@@ -59,7 +59,7 @@ func TestCheckRelativeThreshold(t *testing.T) {
 
 			if test.ExpectPass == true {
 				assert.NoError(t, err)
-				assert.Equal(t, successText, test.ExpectedText)
+				assert.Equal(t, test.ExpectedText, successText)
 			} else {
 				assert.Error(t, err)
 				if test.ExpectedError != "" {
@@ -84,22 +84,22 @@ func TestCheckStaticThreshold(t *testing.T) {
 
 	tests := []testDefs{
 		{
-			Name: "Metric degradation",
+			Name: "Static Threshold - FAIL",
 			Values: values{
 				Metric:    1.0,
 				Threshold: 0.5,
 			},
 			ExpectPass:      false,
-			ExpectedMessage: "FAIL - dummy_metric_name:(avg) was above the static threshold: 1.00, instead of a desired 0.50",
+			ExpectedMessage: "FAIL - dummy_metric_name:(avg) is above the static threshold (0.50) with a value of 1.00",
 		},
 		{
-			Name: "Successful deploy",
+			Name: "Static Threshold - PASS",
 			Values: values{
 				Metric:    0.0,
 				Threshold: 1.0,
 			},
 			ExpectPass:      true,
-			ExpectedMessage: "PASS - dummy_metric_name:(avg) fit static threshold of 1.00 with value 0.00.",
+			ExpectedMessage: "PASS - dummy_metric_name:(avg) is below the static threshold (1.00) with a value of 0.00.",
 		},
 	}
 
@@ -142,11 +142,11 @@ func TestCompareMetrics(t *testing.T) {
 		{
 			Name: "Successful deploy",
 			Values: values{
-				Curr: 0.0,
-				Prev: 1.0,
+				Curr: 1.2,
+				Prev: 4.3,
 			},
 			ExpectPass:      true,
-			ExpectedMessage: "PASS - Successful deploy! Improvement of 1.00, from 1.00 to 0.00",
+			ExpectedMessage: "PASS - dummy_metric_name:(avg) had an improvement of 3.10, from 4.30 to 1.20",
 		},
 	}
 

@@ -36,15 +36,14 @@ Below are the required parameters to query goDynaPerfSignature:
 ## Required Parameters
 * **APIToken** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`. This is not actually required if goDynaPerfSignature is started with a `DT_API_TOKEN`
 * **DTServer** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`. This is not actually required if goDynaPerfSignature is started with a `DT_SERVER`
-* **Metrics** - A comma-delimited array of the metrics you'd like to inspect. 
-  * **ID** - The ID of the metric - The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API.
-    * `builtin:service.response.time:(avg)`
-  * (Optional) **ValidationMethod** - The type of validation you'd like to perform. If no value, the default is the comparison model using the most recent and last deployments. The other options are:
-    * `relative` - If you are willing to have some amount of degradation, you can provide a RelativeThreshold for leniancy in the comparison
-    * `static` - If you want to use a static hard-corded threshold
-  * (Optional) **RelativeThreshold** - If you chose the ValidationMethod `relative`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
-  * (Optional) **StaticThreshold** - If you chose the ValidationMethod `static`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
-    * `1.25`
+* **PSMetrics** - A string-keyed map of the metrics you'd like to inspect, with their Optional values included in the map
+  * The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API. *Example: `builtin:service.response.time:(avg)`*
+    * (Optional) **ValidationMethod** - The type of validation you'd like to perform. If no value, the default is the comparison model using the most recent and last deployments. The other options are:
+      * `relative` - If you are willing to have some amount of degradation, you can provide a RelativeThreshold for leniancy in the comparison
+      * `static` - If you want to use a static hard-corded threshold
+    * (Optional) **RelativeThreshold** - If you chose the ValidationMethod `relative`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
+    * (Optional) **StaticThreshold** - If you chose the ValidationMethod `static`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
+      * `1.25`
 * **ServiceID** - The ID of the Service which you'd like to inspect. This can be found in the UI if you are looking at a Service and pull from its url `id=SERVICE-...`
   * `SERVICE-5D4E743B2BF0CCF5`
 
@@ -62,10 +61,10 @@ Upon calling goDynaPerfSignature, the app will return a JSON payload with the fo
 ## Examples
 This example queries two different metrics:
 ```
-curl -XPOST -d '{"EventAge":180,"Metrics":[{"ID":"builtin:service.response.time:(avg)","RelativeThreshold":1.0,"ValidationMethod":"relative"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+curl -XPOST -d '{"APIToken":"My_API_Token","EventAge":180,"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeThreshold":1.0,"ValidationMethod":"relative"},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
 ```
 
 This example queries for a percentile and does not provide the APIToken. This call will only work if goDynaPerfSignature is started with an DT_API_TOKEN configured:
 ```
-curl -XPOST -d '{"EvaluationMins":5,"Metrics":[{"ID":"builtin:service.response.time:(percentile(90))"}],"ServiceID":"SERVICE-FFA6FB5E2FA9FFA8"}' localhost:8080/performanceSignature
+curl -XPOST -d '{"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeThreshold":1.0,"ValidationMethod":"relative"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
 ```

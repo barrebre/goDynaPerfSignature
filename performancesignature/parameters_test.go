@@ -21,11 +21,11 @@ func TestReadAndValidateParams(t *testing.T) {
 		ExpectedPerfsig datatypes.PerformanceSignature
 	}
 
-	validJSON := `{"DTServer":"testserver","DTEnv":"testEnv","EventAge":180,"APIToken":"S2pMHW_FSlma-PPJIj3l5","Metrics":[{"ID":"builtin:service.response.time:(avg)"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}`
-	invalidJSONNoAPIToken := `{"DTServer":"testserver","DTEnv":"testEnv","Metrics":[{"ID":"builtin:service.response.time:(avg)"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}`
-	invalidJSONNoServer := `{"DTEnv":"testEnv","APIToken":"S2pMHW_FSlma-PPJIj3l5","Metrics":[{"ID":"builtin:service.response.time:(avg)"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}],"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}`
+	validJSON := `{"DTServer":"testserver","DTEnv":"testEnv","EventAge":180,"APIToken":"S2pMHW_FSlma-PPJIj3l5","PSMetrics":{"builtin:service.response.time:(avg)":{},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}`
+	invalidJSONNoAPIToken := `{"DTServer":"testserver","DTEnv":"testEnv","PSMetrics":{"builtin:service.response.time:(avg)":{},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}`
+	invalidJSONNoServer := `{"DTEnv":"testEnv","APIToken":"S2pMHW_FSlma-PPJIj3l5","PSMetrics":{"builtin:service.response.time:(avg)":{},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}`
 	invalidJSONNoMetrics := `{"DTServer":"testserver","DTEnv":"testEnv","APIToken":"S2pMHW_FSlma-PPJIj3l5","ServiceID":"SERVICE-5D4E743B2BF0CCF5"}`
-	invalidJSONNoServices := `{"DTServer":"testserver","DTEnv":"testEnv","APIToken":"S2pMHW_FSlma-PPJIj3l5","Metrics":[{"ID":"builtin:service.response.time:(avg)"},{"ID":"builtin:service.errors.total.rate:(avg)","StaticThreshold":1.0,"ValidationMethod":"static"}]}`
+	invalidJSONNoServices := `{"DTServer":"testserver","DTEnv":"testEnv","APIToken":"S2pMHW_FSlma-PPJIj3l5","PSMetrics":{"builtin:service.response.time:(avg)":{},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}}}`
 
 	tests := []testDefs{
 		{
@@ -40,15 +40,13 @@ func TestReadAndValidateParams(t *testing.T) {
 				DTServer:       "testserver",
 				EvaluationMins: 0,
 				EventAge:       calculateAgeEpoch(180),
-				Metrics: []datatypes.Metric{
-					{
-						ID:                "builtin:service.response.time:(avg)",
+				PSMetrics: map[string]datatypes.PSMetric{
+					"builtin:service.response.time:(avg)": {
 						RelativeThreshold: 0,
 						StaticThreshold:   0,
 						ValidationMethod:  "",
 					},
-					{
-						ID:                "builtin:service.errors.total.rate:(avg)",
+					"builtin:service.errors.total.rate:(avg)": {
 						RelativeThreshold: 0,
 						StaticThreshold:   1,
 						ValidationMethod:  "static",
@@ -89,15 +87,13 @@ func TestReadAndValidateParams(t *testing.T) {
 				DTEnv:          "testEnv",
 				DTServer:       "testserver",
 				EvaluationMins: 0,
-				Metrics: []datatypes.Metric{
-					{
-						ID:                "builtin:service.response.time:(avg)",
+				PSMetrics: map[string]datatypes.PSMetric{
+					"builtin:service.response.time:(avg)": {
 						RelativeThreshold: 0,
 						StaticThreshold:   0,
 						ValidationMethod:  "",
 					},
-					{
-						ID:                "builtin:service.errors.total.rate:(avg)",
+					"builtin:service.errors.total.rate:(avg)": {
 						RelativeThreshold: 0,
 						StaticThreshold:   1,
 						ValidationMethod:  "static",

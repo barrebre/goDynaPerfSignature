@@ -96,7 +96,7 @@ func TestWriteResponse(t *testing.T) {
 		{
 			Name:                       "Failure deployment",
 			ExpectedCode:               406,
-			ExpectedResponse:           []string{"Metric degradation found: "},
+			ExpectedResponse:           []string{"No previous metrics to compare against for metric dummy_metric_name:avg", "PASS - dummy_metric_name:percentile(90) is below the static threshold (1234.12) with a value of 12.34."},
 			PerformanceSignatureReturn: datatypes.GetValidPerformanceSignatureReturnFailure(),
 		},
 	}

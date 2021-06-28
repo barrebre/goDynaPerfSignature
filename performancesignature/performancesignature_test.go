@@ -62,6 +62,7 @@ func TestCheckPerfSignature(t *testing.T) {
 		Name             string
 		PerfSignature    datatypes.PerformanceSignature
 		MetricsResponse  datatypes.ComparisonMetrics
+		ExpectedPass     bool
 		ExpectedResponse []string
 	}
 
@@ -70,49 +71,57 @@ func TestCheckPerfSignature(t *testing.T) {
 			Name:             "Valid Default Check Failing Data",
 			PerfSignature:    datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse:  datatypes.GetValidFailingComparisonMetrics(),
-			ExpectedResponse: []string{"Metric degradation found: FAIL - dummy_metric_name:avg had a degradation of 0.88, from 1234.12 to 1235.00"},
+			ExpectedPass:     false,
+			ExpectedResponse: []string{"Metric degradation found: FAIL - dummy_metric_name:avg had a degradation of 0.88, from 1234.12 to 1235.00", "Metric degradation found: FAIL - dummy_metric_name:percentile(90) had a degradation of 21110.88, from 2345.12 to 23456.00"},
 		},
 		{
 			Name:             "Valid Relative Check Failing Data",
 			PerfSignature:    datatypes.GetValidSmallRelativePerformanceSignature(),
 			MetricsResponse:  datatypes.GetValidFailingComparisonMetrics(),
-			ExpectedResponse: []string{"Metric degradation found: FAIL - dummy_metric_name:avg did not meet the relative threshold criteria. the current performance is 1235.00, which is not better than the previous value of 1234.12 plus the relative threshold of 0.00."},
+			ExpectedPass:     false,
+			ExpectedResponse: []string{"Metric degradation found: FAIL - dummy_metric_name:avg did not meet the relative threshold criteria. The current performance is 1235.00, which is not better than the previous value (1234.12) plus the relative threshold (0.00).", "Metric degradation found: FAIL - dummy_metric_name:percentile(90) had a degradation of 21110.88, from 2345.12 to 23456.00"},
 		},
 		{
 			Name:             "Valid Relative Check Passing Data",
 			PerfSignature:    datatypes.GetValidLargeRelativePerformanceSignature(),
 			MetricsResponse:  datatypes.GetValidPassingComparisonMetrics(),
-			ExpectedResponse: []string{"PASS - dummy_metric_name:avg improvement to 1234.12 from 1235.00. (Difference: -0.88)"},
+			ExpectedPass:     true,
+			ExpectedResponse: []string{"PASS - dummy_metric_name:avg had an improvement of 0.88, from 1235.00 to 1234.12"},
 		},
 		{
 			Name:             "Valid Static Check Failing Data",
 			PerfSignature:    datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse:  datatypes.GetValidFailingComparisonMetrics(),
-			ExpectedResponse: []string{"Metric degradation found: FAIL - dummy_metric_name:percentile(90) was above the static threshold: 1235.00, instead of a desired 1234.12"},
+			ExpectedPass:     false,
+			ExpectedResponse: []string{"Metric degradation found: FAIL - dummy_metric_name:avg had a degradation of 0.88, from 1234.12 to 1235.00", "Metric degradation found: FAIL - dummy_metric_name:percentile(90) is above the static threshold (1234.12) with a value of 23456.00"},
 		},
 		{
 			Name:             "Valid Default Check Passing Data",
 			PerfSignature:    datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse:  datatypes.GetValidPassingComparisonMetrics(),
-			ExpectedResponse: []string{"PASS - Successful deploy! Improvement of 0.88, from 1235.00 to 1234.12"},
+			ExpectedPass:     true,
+			ExpectedResponse: []string{"PASS - dummy_metric_name:avg had an improvement of 0.88, from 1235.00 to 1234.12"},
 		},
 		{
 			Name:             "No Data Returned",
 			PerfSignature:    datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse:  datatypes.GetMissingComparisonMetrics(),
-			ExpectedResponse: []string{"there were no current metrics found for dummy_metric_name:percentile(90)"},
+			ExpectedPass:     true,
+			ExpectedResponse: []string{"PASS - There were no current metrics returned from Dynatrace."},
 		},
 		{
 			Name:             "No Previous Deployment Data Returned - Default Check",
 			PerfSignature:    datatypes.GetValidDefaultPerformanceSignature(),
 			MetricsResponse:  datatypes.GetMissingPreviousComparisonMetrics(),
-			ExpectedResponse: []string{"No previous metrics to compare against for metric dummy_metric_name:avg"},
+			ExpectedPass:     true,
+			ExpectedResponse: []string{"No previous metrics to compare against for metric dummy_metric_name:avg", "No previous metrics to compare against for metric dummy_metric_name:percentile(90)"},
 		},
 		{
 			Name:             "No Previous Deployment Data Returned - Static Check",
 			PerfSignature:    datatypes.GetValidStaticPerformanceSignature(),
 			MetricsResponse:  datatypes.GetMissingPreviousComparisonMetrics(),
-			ExpectedResponse: []string{"PASS - dummy_metric_name:percentile(90) fit static threshold of 1234.12 with value 12.34."},
+			ExpectedPass:     true,
+			ExpectedResponse: []string{"No previous metrics to compare against for metric dummy_metric_name:avg", "PASS - dummy_metric_name:percentile(90) is below the static threshold (1234.12) with a value of 12.34."},
 		},
 	}
 
@@ -121,6 +130,7 @@ func TestCheckPerfSignature(t *testing.T) {
 			response := checkPerfSignature(test.PerfSignature, test.MetricsResponse)
 
 			assert.Equal(t, test.ExpectedResponse, response.Response)
+			assert.Equal(t, test.ExpectedPass, response.Pass)
 		})
 	}
 

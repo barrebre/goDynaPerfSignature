@@ -36,7 +36,7 @@ func checkParams(params datatypes.PerformanceSignature, config datatypes.Config)
 		DTServer:       config.Server,
 		EvaluationMins: params.EvaluationMins,
 		EventAge:       params.EventAge,
-		Metrics:        params.Metrics,
+		PSMetrics:      params.PSMetrics,
 		ServiceID:      params.ServiceID,
 	}
 
@@ -87,7 +87,7 @@ func validateParams(finalQuery datatypes.PerformanceSignature) error {
 		return fmt.Errorf("there is no DT_SERVER env variable configured and no DTServer was passed with the POST")
 	}
 
-	if len(finalQuery.Metrics) == 0 {
+	if len(finalQuery.PSMetrics) == 0 {
 		return fmt.Errorf("no Metrics passed with the POST")
 	}
 

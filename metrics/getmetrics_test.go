@@ -10,20 +10,16 @@ import (
 func TestCreateMetricString(t *testing.T) {
 	type testDefs struct {
 		Name   string
-		Input  []datatypes.Metric
+		Input  map[string]datatypes.PSMetric
 		Output string
 	}
 
 	tests := []testDefs{
 		{
 			Name: "Metric degradation",
-			Input: []datatypes.Metric{
-				{
-					ID: "metric1",
-				},
-				{
-					ID: "metric2",
-				},
+			Input: map[string]datatypes.PSMetric{
+				"metric1": {},
+				"metric2": {},
 			},
 			Output: "metric1,metric2,",
 		},
@@ -85,8 +81,3 @@ func TestBuildMetricsQueryURL(t *testing.T) {
 		})
 	}
 }
-
-//"https://hfn13693.live.dynatrace.com/api/v2/metrics/query
-// ?metricSelector=builtin%3Aservice.response.time%3Apercentile%2890%29
-// &resolution=Inf
-// &entitySelector=entityId%28%22SERVICE-SERVICE-%22%29"

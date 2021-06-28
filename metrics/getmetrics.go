@@ -14,7 +14,7 @@ import (
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
 func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (datatypes.ComparisonMetrics, error) {
-	metricString := createMetricString(ps.Metrics)
+	metricString := createMetricString(ps.PSMetrics)
 	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Escaped safe metric names are: %v", metricString)})
 
 	// Get the metrics from the most recent Deployment Event
@@ -45,10 +45,10 @@ func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (d
 }
 
 // Transform the POSTed metrics into escaped strings
-func createMetricString(metricNames []datatypes.Metric) string {
+func createMetricString(metricNames map[string]datatypes.PSMetric) string {
 	metricString := ""
-	for _, metric := range metricNames {
-		metricString += metric.ID + ","
+	for name := range metricNames {
+		metricString += name + ","
 	}
 	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Safe metric names are: %v", metricString)})
 
@@ -130,8 +130,3 @@ func buildMetricsQueryURL(server string, env string, metricString string, ts dat
 
 	return newURL.String()
 }
-
-//"https://hfn13693.live.dynatrace.com/api/v2/metrics/query
-// ?metricSelector=builtin%3Aservice.response.time%3Apercentile%2890%29
-// &resolution=Inf
-// &entitySelector=entityId%28%22SERVICE-SERVICE-%22%29"

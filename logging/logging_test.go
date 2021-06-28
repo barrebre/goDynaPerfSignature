@@ -39,10 +39,8 @@ func TestSetLogLevel(t *testing.T) {
 
 func TestNoReturnMethods(t *testing.T) {
 	perfSig := datatypes.PerformanceSignature{
-		Metrics: []datatypes.Metric{
-			{
-				ID: "asdf",
-			},
+		PSMetrics: map[string]datatypes.PSMetric{
+			"asdf": {},
 		},
 	}
 	LogInfo(datatypes.Logging{Message: "asdf", PerfSig: perfSig})

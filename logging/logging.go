@@ -59,7 +59,7 @@ func writeLog(info datatypes.Logging, level string) {
 	logMsg += fmt.Sprintf(`"message":"%v",`, info.Message)
 
 	// Possibly add perfSig
-	if len(info.PerfSig.Metrics) > 0 {
+	if len(info.PerfSig.PSMetrics) > 0 {
 		sig, _ := json.Marshal(info.PerfSig)
 		logMsg += string(sig)
 	}

@@ -3,8 +3,7 @@ package datatypes
 //// Definitions
 
 // Metric defines a Dynatrace Service we'd like to investigate and how we'd like to validate it
-type Metric struct {
-	ID                string
+type PSMetric struct {
 	RelativeThreshold float64
 	StaticThreshold   float64
 	ValidationMethod  string
@@ -34,85 +33,6 @@ type MetricValues struct {
 	Values     []float64 `json:"values"`
 }
 
-// **** NEW
-// {
-// 	"totalCount":2,
-// 	"nextPageKey":null,
-// 	"result":[
-// 		{
-// 			"metricId":"builtin:service.response.time:avg",
-// 			"data":[
-// 				{
-// 					"dimensions":["SERVICE-SERVICE-"],
-// 					"dimensionMap":{"dt.entity.service":"SERVICE-SERVICE-"},
-// 					"timestamps":[1624028460000],
-// 					"values":[75220.375]
-// 				}
-// 			]
-// 		},
-// 		{
-// 			"metricId":"builtin:service.errors.total.rate:avg",
-// 			"data":[
-// 				{
-// 					"dimensions":["SERVICE-SERVICE-"],
-// 					"dimensionMap":{"dt.entity.service":"SERVICE-SERVICE-"},
-// 					"timestamps":[1624028460000],
-// 					"values":[0]
-// 				}
-// 			]
-// 		}
-// 	]
-// }
-
-// **** OLD
-
-// DynatraceMetricsResponse defines what we receive from the Dt Metrics v2 API
-// type DynatraceMetricsResponse struct {
-// 	Metrics map[string]MetricValuesArray `json:"metrics"`
-// }
-
-// // MetricValuesArray - The Dynatrace API always returns an array of timestamps, even though we only need the first value each time
-// type MetricValuesArray struct {
-// 	MetricValues []MetricValues `json:"values"`
-// }
-
-// // MetricValues defines what we receive for each metric
-// type MetricValues struct {
-// 	Dimensions []string `json:"dimensions"`
-// 	Timestamp  int64    `json:"timestamp"`
-// 	Value      float64  `json:"value"`
-// }
-
-// {
-// 	"totalCount":1,
-// 	"nextPageKey":null,
-// 	"metrics":
-// 	{
-// 		"builtin:service.errors.total.rate:avg":
-// 		{
-// 			"values":
-// 			[
-// 				{
-// 					"dimensions":["SERVICE-SERVICE-"],
-// 					"timestamp":1624028460000,
-// 					"value":0.0
-// 				}
-// 			]
-// 		},
-// 		"builtin:service.response.time:avg":
-// 		{
-// 			"values":
-// 			[
-// 				{
-// 					"dimensions":["SERVICE-SERVICE-"],
-// 					"timestamp":1624028460000,
-// 					"value":75220.375
-// 				}
-// 			]
-// 		}
-// 	}
-// }
-
 //// Example Values
 var (
 	validFailingComparisonMetrics = ComparisonMetrics{
@@ -137,8 +57,8 @@ var (
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamps: []int64{1234},
-							Values:     []float64{1235},
+							Timestamps: []int64{23456},
+							Values:     []float64{23456},
 						},
 					},
 				},
@@ -165,8 +85,8 @@ var (
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamps: []int64{2345},
-							Values:     []float64{1234.1234},
+							Timestamps: []int64{3456},
+							Values:     []float64{2345.1234},
 						},
 					},
 				},
