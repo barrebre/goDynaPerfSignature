@@ -138,6 +138,30 @@ var (
 		},
 	}
 
+	missingMetricValues = ComparisonMetrics{
+		CurrentMetrics: DynatraceMetricsResponse{
+			Metrics: []MetricValuesArray{
+				{
+					MetricId:     "dummy_metric_name:avg",
+					MetricValues: []MetricValues{},
+				},
+			},
+		},
+	}
+
+	missingMetricValuePoints = ComparisonMetrics{
+		CurrentMetrics: DynatraceMetricsResponse{
+			Metrics: []MetricValuesArray{
+				{
+					MetricId: "dummy_metric_name:avg",
+					MetricValues: []MetricValues{
+						{},
+					},
+				},
+			},
+		},
+	}
+
 	missingPreviousComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
 			Metrics: []MetricValuesArray{
@@ -179,6 +203,16 @@ var (
 // GetMissingComparisonMetrics returns a ComparisonMetrics missing Metrics
 func GetMissingComparisonMetrics() ComparisonMetrics {
 	return missingComparisonMetrics
+}
+
+// GetMissingMetricValues returns a ComparisonMetrics missing responses
+func GetMissingMetricValues() ComparisonMetrics {
+	return missingMetricValues
+}
+
+// GetMissingMetricValuePoints returns a ComparisonMetrics missing value points
+func GetMissingMetricValuePoints() ComparisonMetrics {
+	return missingMetricValuePoints
 }
 
 // GetMissingPreviousComparisonMetrics returns a ComparisonMetrics missing Metrics
