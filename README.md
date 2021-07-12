@@ -72,8 +72,7 @@ curl -XPOST -d '{"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeTh
 ## Breaking Change in release 1.7.0
 There was a breaking change introduced in version 1.7.0, when the app was updated to use the new Dynatrace API endpoint. The "Metrics" parameter was renamed to "PSMetrics". The new "PSMetrics" parameter is no longer an array of objects with ID's equal to the metric names, but instead a map of objects keyed off the metric names.
 ```
-"Metrics":
-[
+"Metrics": [
   {
     "ID":"builtin:service.response.time:(avg)",
     "RelativeThreshold":1.0,
@@ -88,8 +87,7 @@ There was a breaking change introduced in version 1.7.0, when the app was update
 ```
 Became
 ```
-"PSMetrics":
-{
+"PSMetrics": {
   "builtin:service.response.time:(avg)": {
     "RelativeThreshold":1.0,
     "ValidationMethod":"relative"
