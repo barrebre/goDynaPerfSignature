@@ -7,8 +7,8 @@ goDynaPerfSignature is an Automated Quality Gate for Dynatrace. It is a standalo
 * [Calling the Application](#calling-the-application)
   * [Required Parameters](#required-parameters)
   * [Optional Parameters](#optional-parameters)
-  * [Returned Json](#returned-json)
-* [Breaking Change in Release 1.7.0](breaking-change-in-release-1-7-0)
+  * [Returned JSON](#returned-json)
+* [Breaking Change in Release 1.7.0](breaking-change-in-release-170)
 
 # How it works
 [Deployment Events](https://www.dynatrace.com/support/help/shortlink/event-types-info#deployment) must be pushed to Dynatrace for goDynaPerfSignature to know when to evaluate metrics.
@@ -46,7 +46,7 @@ Below are the required parameters to query goDynaPerfSignature:
 ## Required Parameters
 * **APIToken** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`. This is not actually required if goDynaPerfSignature is started with a `DT_API_TOKEN`
 * **DTServer** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`. This is not actually required if goDynaPerfSignature is started with a `DT_SERVER`
-* **PSMetrics** - A string-keyed map of the metric names you'd like to inspect, with their Optional values included in the map. Please see [below for an example](breaking-change-in-release-1-7-0). The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API.
+* **PSMetrics** - A string-keyed map of the metric names you'd like to inspect, with their Optional values included in the map. Please see [below for an example](breaking-change-in-release-170). The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API.
     * **ValidationMethod** (Optional) - The type of validation you'd like to perform. If no value, the default is the comparison model using the most recent and last deployments. The other options are:
       * `relative` - If you are willing to have some amount of degradation, you can provide a RelativeThreshold for leniancy in the comparison
       * `static` - If you want to use a static hard-corded threshold
@@ -69,6 +69,7 @@ Upon calling goDynaPerfSignature, the app will return a JSON payload with the fo
 
 ## Examples
 This example queries two different metrics:
+
 ```
 curl -XPOST -d '{
   "EventAge":180,
@@ -87,6 +88,7 @@ curl -XPOST -d '{
 ```
 
 This example queries for a percentile and does not provide the APIToken. This call will only work if goDynaPerfSignature is started with an DT_API_TOKEN configured:
+
 ```
 curl -XPOST -d '{
   "PSMetrics":{
