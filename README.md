@@ -36,7 +36,7 @@ Below are the required parameters to query goDynaPerfSignature:
 ## Required Parameters
 * **APIToken** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`. This is not actually required if goDynaPerfSignature is started with a `DT_API_TOKEN`
 * **DTServer** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`. This is not actually required if goDynaPerfSignature is started with a `DT_SERVER`
-* **PSMetrics** - A string-keyed map of the metrics you'd like to inspect, with their Optional values included in the map
+* **PSMetrics** - A string-keyed map of the metric names you'd like to inspect, with their Optional values included in the map. *Example: `"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeThreshold":1.0,"ValidationMethod":"relative"},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}}`*
   * The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API. *Example: `builtin:service.response.time:(avg)`*
     * (Optional) **ValidationMethod** - The type of validation you'd like to perform. If no value, the default is the comparison model using the most recent and last deployments. The other options are:
       * `relative` - If you are willing to have some amount of degradation, you can provide a RelativeThreshold for leniancy in the comparison
@@ -68,3 +68,32 @@ This example queries for a percentile and does not provide the APIToken. This ca
 ```
 curl -XPOST -d '{"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeThreshold":1.0,"ValidationMethod":"relative"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
 ```
+
+## Breaking Change in release 1.7.0
+There was a breaking change introduced in version 1.7.0, when the app was updated to use the new Dynatrace API endpoint. The "Metrics" parameter was renamed to "PSMetrics". The new "PSMetrics" parameter is no longer an array of objects with ID's equal to the metric names, but instead a map of objects keyed off the metric names.
+```
+"Metrics":
+[
+  {
+    "ID":"builtin:service.response.time:(avg)",
+    "RelativeThreshold":1.0,
+    "ValidationMethod":"relative"
+  },
+  {
+    "ID":"builtin:service.errors.total.rate:(avg)",
+    "StaticThreshold":1.0,
+    "ValidationMethod":"static"
+  }
+]`
+Became
+```
+"PSMetrics": {
+  "builtin:service.response.time:(avg)": {
+    "RelativeThreshold":1.0,
+    "ValidationMethod":"relative"
+  },
+  "builtin:service.errors.total.rate:(avg)": {
+    "StaticThreshold":1.0,
+    "ValidationMethod":"static"
+  }
+}`
