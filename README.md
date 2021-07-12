@@ -84,7 +84,8 @@ There was a breaking change introduced in version 1.7.0, when the app was update
     "StaticThreshold":1.0,
     "ValidationMethod":"static"
   }
-]`
+]
+```
 Became
 ```
 "PSMetrics": {
@@ -96,4 +97,5 @@ Became
     "StaticThreshold":1.0,
     "ValidationMethod":"static"
   }
-}`
+}
+```
