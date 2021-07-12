@@ -88,7 +88,8 @@ There was a breaking change introduced in version 1.7.0, when the app was update
 ```
 Became
 ```
-"PSMetrics": {
+"PSMetrics":
+{
   "builtin:service.response.time:(avg)": {
     "RelativeThreshold":1.0,
     "ValidationMethod":"relative"
