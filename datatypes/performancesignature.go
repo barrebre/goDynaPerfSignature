@@ -9,7 +9,7 @@ type PerformanceSignature struct {
 	DTServer       string
 	EvaluationMins int
 	EventAge       int
-	Metrics        []Metric
+	PSMetrics      map[string]PSMetric
 	ServiceID      string
 }
 
@@ -26,10 +26,8 @@ var (
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
 		EventAge:       1598818148,
-		Metrics: []Metric{
-			{
-				ID: "dummy_metric_name:(avg)",
-			},
+		PSMetrics: map[string]PSMetric{
+			"dummy_metric_name:avg": {},
 		},
 		ServiceID: "asdf",
 	}
@@ -38,9 +36,8 @@ var (
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
 		EventAge:       10234,
-		Metrics: []Metric{
-			{
-				ID:                "dummy_metric_name:(avg)",
+		PSMetrics: map[string]PSMetric{
+			"dummy_metric_name:avg": {
 				RelativeThreshold: 20,
 				ValidationMethod:  "relative",
 			},
@@ -52,9 +49,8 @@ var (
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
 		EventAge:       992348,
-		Metrics: []Metric{
-			{
-				ID:                "dummy_metric_name:(avg)",
+		PSMetrics: map[string]PSMetric{
+			"dummy_metric_name:avg": {
 				RelativeThreshold: 0,
 				ValidationMethod:  "relative",
 			},
@@ -65,9 +61,8 @@ var (
 	validStaticPerformanceSignature = PerformanceSignature{
 		APIToken:       "asdf1234",
 		EvaluationMins: 5,
-		Metrics: []Metric{
-			{
-				ID:               "dummy_metric_name:percentile(90)",
+		PSMetrics: map[string]PSMetric{
+			"dummy_metric_name:percentile(90)": {
 				StaticThreshold:  1234.1234,
 				ValidationMethod: "static",
 			},
@@ -83,7 +78,7 @@ var (
 
 	validPerformanceSignatureReturnFailure = PerformanceSignatureReturn{
 		Pass:     false,
-		Response: []string{"Metric degradation found: "},
+		Response: []string{"No previous metrics to compare against for metric dummy_metric_name:avg", "PASS - dummy_metric_name:percentile(90) is below the static threshold (1234.12) with a value of 12.34."},
 	}
 )
 

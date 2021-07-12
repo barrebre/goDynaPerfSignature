@@ -111,40 +111,55 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 	result := datatypes.PerformanceSignatureReturn{
 		Pass: true,
 	}
-	for _, metric := range performanceSignature.Metrics {
-		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Looking at metric %v", metric)})
 
-		var cleanMetricName string
-		if strings.Contains(metric.ID, "percentile") {
-			cleanMetricName = metric.ID
+	if len(metricsResponse.CurrentMetrics.Metrics) < 1 {
+		result.Response = []string{"PASS - There were no current metrics returned from Dynatrace"}
+		return result
+	}
+
+	var cleanMetricName string
+	for num, metric := range metricsResponse.CurrentMetrics.Metrics {
+		if strings.Contains(metric.MetricId, "percentile") {
+			cleanMetricName = metric.MetricId
 		} else {
-			cleanMetricName = strings.ReplaceAll(metric.ID, "(", "")
+			cleanMetricName = strings.ReplaceAll(metric.MetricId, "(", "")
 			cleanMetricName = strings.ReplaceAll(cleanMetricName, ")", "")
 		}
-		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Clean name is: %v.", cleanMetricName)})
 
-		logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Current Metrics are: %v.", metricsResponse.CurrentMetrics)})
-		if len(metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
+		localSig := performanceSignature.PSMetrics[cleanMetricName]
+
+		if len(metric.MetricValues) < 1 {
 			return datatypes.PerformanceSignatureReturn{
-				Pass:     false,
-				Response: []string{fmt.Sprintf("there were no current metrics found for %v", cleanMetricName)},
+				Pass:     true,
+				Response: []string{fmt.Sprintf("PASS - There were no current metrics returned from Dynatrace for %v", cleanMetricName)},
 			}
 		}
-		currentMetricValues := metricsResponse.CurrentMetrics.Metrics[cleanMetricName].MetricValues[0].Value
+
+		if len(metric.MetricValues[0].Values) < 1 {
+			return datatypes.PerformanceSignatureReturn{
+				Pass:     true,
+				Response: []string{fmt.Sprintf("PASS - There were no current metric values returned from Dynatrace for %v", cleanMetricName)},
+			}
+		}
+		currentMetricValues := metric.MetricValues[0].Values[0]
 
 		// This is only an issue if trying a comparison
 		canCompare := true
 		var previousMetricValues float64
-		if len(metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues) < 1 {
+		if len(metricsResponse.PreviousMetrics.Metrics[num].MetricValues) < 1 {
 			canCompare = false
 		} else {
-			previousMetricValues = metricsResponse.PreviousMetrics.Metrics[cleanMetricName].MetricValues[0].Value
+			if len(metricsResponse.PreviousMetrics.Metrics[num].MetricValues[0].Values) < 1 {
+				canCompare = false
+			} else {
+				previousMetricValues = metricsResponse.PreviousMetrics.Metrics[num].MetricValues[0].Values[0]
+			}
 		}
 
-		switch checkCounts := metric.ValidationMethod; checkCounts {
+		switch checkCounts := localSig.ValidationMethod; checkCounts {
 		case "relative":
 			logging.LogDebug(datatypes.Logging{Message: "Relative Check"})
-			response, err := metrics.CheckRelativeThreshold(currentMetricValues, previousMetricValues, metric.RelativeThreshold, cleanMetricName)
+			response, err := metrics.CheckRelativeThreshold(currentMetricValues, previousMetricValues, localSig.RelativeThreshold, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
 				logging.LogInfo(datatypes.Logging{Message: degradationText})
@@ -155,7 +170,7 @@ func checkPerfSignature(performanceSignature datatypes.PerformanceSignature, met
 			}
 		case "static":
 			logging.LogDebug(datatypes.Logging{Message: "Static Check"})
-			response, err := metrics.CheckStaticThreshold(currentMetricValues, metric.StaticThreshold, cleanMetricName)
+			response, err := metrics.CheckStaticThreshold(currentMetricValues, localSig.StaticThreshold, cleanMetricName)
 			if err != nil {
 				degradationText := fmt.Sprintf("Metric degradation found: %v", err)
 				logging.LogInfo(datatypes.Logging{Message: degradationText})

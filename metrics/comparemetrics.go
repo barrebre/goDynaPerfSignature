@@ -14,7 +14,7 @@ func CompareMetrics(curr float64, prev float64, metric string) (string, error) {
 		return "", fmt.Errorf(errorMessage)
 	}
 
-	successResponse := fmt.Sprintf("PASS - Successful deploy! Improvement of %.2f, from %.2f to %.2f", math.Abs(delta), prev, curr)
+	successResponse := fmt.Sprintf("PASS - %v had an improvement of %.2f, from %.2f to %.2f", metric, math.Abs(delta), prev, curr)
 	return successResponse, nil
 }
 
@@ -25,13 +25,13 @@ func CheckRelativeThreshold(curr float64, prev float64, rel float64, metric stri
 
 	// If the difference including the threshold is still negative, it's a failure
 	if relDiff > 0 {
-		errorMessage := fmt.Sprintf("FAIL - %v did not meet the relative threshold criteria. the current performance is %.2f, which is not better than the previous value of %.2f plus the relative threshold of %.2f.", metric, curr, prev, rel)
+		errorMessage := fmt.Sprintf("FAIL - %v did not meet the relative threshold criteria. The current performance is %.2f, which is not better than the previous value (%.2f) plus the relative threshold (%.2f).", metric, curr, prev, rel)
 		return "", fmt.Errorf(errorMessage)
 	}
 
 	// If the delta is negative, that means there was a performance improvement
 	if delta < 0 {
-		successResponse := fmt.Sprintf("PASS - %v improvement to %.2f from %.2f. (Difference: %.2f)", metric, curr, prev, delta)
+		successResponse := fmt.Sprintf("PASS - %v had an improvement of %.2f, from %.2f to %.2f", metric, math.Abs(delta), prev, curr)
 		return successResponse, nil
 	}
 
@@ -40,15 +40,15 @@ func CheckRelativeThreshold(curr float64, prev float64, rel float64, metric stri
 	return successResponse, nil
 }
 
-// CheckStaticThreshold compares the metrics from the current and previous timeframe
+// CheckStaticThreshold checks the current value against a static threshold
 func CheckStaticThreshold(value float64, threshold float64, metric string) (string, error) {
 	delta := value - threshold
 
 	if delta > 0 {
-		errorMessage := fmt.Sprintf("FAIL - %v was above the static threshold: %.2f, instead of a desired %.2f", metric, value, threshold)
+		errorMessage := fmt.Sprintf("FAIL - %v is above the static threshold (%.2f) with a value of %.2f", metric, threshold, value)
 		return "", fmt.Errorf(errorMessage)
 	}
 
-	successResponse := fmt.Sprintf("PASS - %v fit static threshold of %.2f with value %.2f.", metric, threshold, value)
+	successResponse := fmt.Sprintf("PASS - %v is below the static threshold (%.2f) with a value of %.2f.", metric, threshold, value)
 	return successResponse, nil
 }

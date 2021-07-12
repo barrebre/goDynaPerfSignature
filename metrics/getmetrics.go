@@ -14,7 +14,7 @@ import (
 
 // GetMetrics retrieves the metrics from both Deployment Event times in Dynatrace
 func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (datatypes.ComparisonMetrics, error) {
-	metricString := createMetricString(ps.Metrics)
+	metricString := createMetricString(ps.PSMetrics)
 	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Escaped safe metric names are: %v", metricString)})
 
 	// Get the metrics from the most recent Deployment Event
@@ -45,10 +45,10 @@ func GetMetrics(ps datatypes.PerformanceSignature, ts []datatypes.Timestamps) (d
 }
 
 // Transform the POSTed metrics into escaped strings
-func createMetricString(metricNames []datatypes.Metric) string {
+func createMetricString(metricNames map[string]datatypes.PSMetric) string {
 	metricString := ""
-	for _, metric := range metricNames {
-		metricString += metric.ID + ","
+	for name := range metricNames {
+		metricString += name + ","
 	}
 	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Safe metric names are: %v", metricString)})
 
@@ -87,6 +87,7 @@ func queryMetrics(server string, env string, metricString string, ts datatypes.T
 		logging.LogError(datatypes.Logging{Message: fmt.Sprintf("Could not read response body from Dynatrace: %v", err.Error())})
 		return datatypes.DynatraceMetricsResponse{}, fmt.Errorf("could not read response body from Dynatrace: %v", err.Error())
 	}
+	logging.LogDebug(datatypes.Logging{Message: fmt.Sprintf("Full response from Dynatrace is: %v.", string(b))})
 
 	// Check the status code
 	if r.StatusCode != 200 {
@@ -112,17 +113,18 @@ func buildMetricsQueryURL(server string, env string, metricString string, ts dat
 	}
 
 	q := newURL.Query()
+	q.Set("metricSelector", metricString)
 	q.Set("resolution", "Inf")
 	q.Set("from", fmt.Sprint(ts.StartTime))
 	q.Set("to", fmt.Sprint(ts.EndTime))
-	q.Set("scope", fmt.Sprintf("entity(%v)", ps.ServiceID))
+	q.Set("entitySelector", fmt.Sprintf("entityId(\"%v\")", ps.ServiceID))
 	newURL.RawQuery = q.Encode()
 
 	// Check if there's a Dynatrace environment specified
 	if env == "" {
-		newURL.Path = fmt.Sprintf("api/v2/metrics/series/%v", metricString)
+		newURL.Path = "api/v2/metrics/query"
 	} else {
-		newURL.Path = fmt.Sprintf("/e/%v/api/v2/metrics/series/%v", env, metricString)
+		newURL.Path = fmt.Sprintf("/e/%v/api/v2/metrics/query", env)
 	}
 	logging.LogInfo(datatypes.Logging{Message: fmt.Sprintf("Built URL: %v", newURL.String())})
 

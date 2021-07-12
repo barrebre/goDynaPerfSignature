@@ -10,20 +10,16 @@ import (
 func TestCreateMetricString(t *testing.T) {
 	type testDefs struct {
 		Name   string
-		Input  []datatypes.Metric
+		Input  map[string]datatypes.PSMetric
 		Output string
 	}
 
 	tests := []testDefs{
 		{
 			Name: "Metric degradation",
-			Input: []datatypes.Metric{
-				{
-					ID: "metric1",
-				},
-				{
-					ID: "metric2",
-				},
+			Input: map[string]datatypes.PSMetric{
+				"metric1": {},
+				"metric2": {},
 			},
 			Output: "metric1,metric2,",
 		},
@@ -63,7 +59,7 @@ func TestBuildMetricsQueryURL(t *testing.T) {
 				TS:           datatypes.GetSingleTimestamp(),
 				PS:           datatypes.GetValidStaticPerformanceSignature(),
 			},
-			Output: "https://myserv/e/env1234/api/v2/metrics/series/builtin:service.response.time:%28avg%29,builtin:service.errors.total.rate:%28avg%29,?from=1234&resolution=Inf&scope=entity%28asdf%29&to=2345",
+			Output: "https://myserv/e/env1234/api/v2/metrics/query?entitySelector=entityId%28%22asdf%22%29&from=1234&metricSelector=builtin%3Aservice.response.time%3A%28avg%29%2Cbuiltin%3Aservice.errors.total.rate%3A%28avg%29%2C&resolution=Inf&to=2345",
 		},
 		{
 			Name: "Query without ENV",
@@ -73,7 +69,7 @@ func TestBuildMetricsQueryURL(t *testing.T) {
 				TS:           datatypes.GetSingleTimestamp(),
 				PS:           datatypes.GetValidStaticPerformanceSignature(),
 			},
-			Output: "https://myserv/api/v2/metrics/series/builtin:service.response.time:%28avg%29,builtin:service.errors.total.rate:%28avg%29,?from=1234&resolution=Inf&scope=entity%28asdf%29&to=2345",
+			Output: "https://myserv/api/v2/metrics/query?entitySelector=entityId%28%22asdf%22%29&from=1234&metricSelector=builtin%3Aservice.response.time%3A%28avg%29%2Cbuiltin%3Aservice.errors.total.rate%3A%28avg%29%2C&resolution=Inf&to=2345",
 		},
 	}
 
@@ -81,7 +77,7 @@ func TestBuildMetricsQueryURL(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			metricQueryURL := buildMetricsQueryURL(test.Input.Server, test.Input.Env, test.Input.MetricString, test.Input.TS, test.Input.PS)
 
-			assert.Equal(t, metricQueryURL, test.Output)
+			assert.Equal(t, test.Output, metricQueryURL)
 		})
 	}
 }

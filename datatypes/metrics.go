@@ -3,8 +3,7 @@ package datatypes
 //// Definitions
 
 // Metric defines a Dynatrace Service we'd like to investigate and how we'd like to validate it
-type Metric struct {
-	ID                string
+type PSMetric struct {
 	RelativeThreshold float64
 	StaticThreshold   float64
 	ValidationMethod  string
@@ -18,71 +17,76 @@ type ComparisonMetrics struct {
 
 // DynatraceMetricsResponse defines what we receive from the Dt Metrics v2 API
 type DynatraceMetricsResponse struct {
-	Metrics map[string]MetricValuesArray `json:"metrics"`
+	Metrics []MetricValuesArray `json:"result"`
 }
 
 // MetricValuesArray - The Dynatrace API always returns an array of timestamps, even though we only need the first value each time
 type MetricValuesArray struct {
-	MetricValues []MetricValues `json:"values"`
+	MetricId     string         `json:"metricId"`
+	MetricValues []MetricValues `json:"data"`
 }
 
 // MetricValues defines what we receive for each metric
 type MetricValues struct {
-	Dimensions []string `json:"dimensions"`
-	Timestamp  int64    `json:"timestamp"`
-	Value      float64  `json:"value"`
+	Dimensions []string  `json:"dimensions"`
+	Timestamps []int64   `json:"timestamps"`
+	Values     []float64 `json:"values"`
 }
 
 //// Example Values
 var (
 	validFailingComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": {
+			Metrics: []MetricValuesArray{
+				{
+					MetricId: "dummy_metric_name:avg",
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamp: 1234,
-							Value:     1235,
+							Timestamps: []int64{1234},
+							Values:     []float64{1235},
 						},
 					},
 				},
-				"dummy_metric_name:percentile(90)": {
+				{
+					MetricId: "dummy_metric_name:percentile(90)",
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamp: 1234,
-							Value:     1235,
+							Timestamps: []int64{23456},
+							Values:     []float64{23456},
 						},
 					},
 				},
 			},
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": {
+			Metrics: []MetricValuesArray{
+				{
+					MetricId: "dummy_metric_name:avg",
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamp: 2345,
-							Value:     1234.1234,
+							Timestamps: []int64{2345},
+							Values:     []float64{1234.1234},
 						},
 					},
 				},
-				"dummy_metric_name:percentile(90)": {
+				{
+					MetricId: "dummy_metric_name:percentile(90)",
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamp: 2345,
-							Value:     1234.1234,
+							Timestamps: []int64{3456},
+							Values:     []float64{2345.1234},
 						},
 					},
 				},
@@ -92,30 +96,32 @@ var (
 
 	validPassingComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": {
+			Metrics: []MetricValuesArray{
+				{
+					MetricId: "dummy_metric_name:avg",
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamp: 1234,
-							Value:     1234.1234,
+							Timestamps: []int64{1234},
+							Values:     []float64{1234.1234},
 						},
 					},
 				},
 			},
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": {
+			Metrics: []MetricValuesArray{
+				{
+					MetricId: "dummy_metric_name:avg",
 					MetricValues: []MetricValues{
 						{
 							Dimensions: []string{
 								"dim1",
 							},
-							Timestamp: 2345,
-							Value:     1235,
+							Timestamps: []int64{2345},
+							Values:     []float64{1235},
 						},
 					},
 				},
@@ -125,34 +131,66 @@ var (
 
 	missingComparisonMetrics = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{},
+			Metrics: []MetricValuesArray{},
 		},
 		PreviousMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{},
+			Metrics: []MetricValuesArray{},
 		},
 	}
 
-	missingPreviousComparisonMetrics = ComparisonMetrics{
+	missingMetricValues = ComparisonMetrics{
 		CurrentMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": {
-					MetricValues: []MetricValues{
-						{},
-					},
+			Metrics: []MetricValuesArray{
+				{
+					MetricId:     "dummy_metric_name:avg",
+					MetricValues: []MetricValues{},
 				},
-				"dummy_metric_name:percentile(90)": {
+			},
+		},
+	}
+
+	missingMetricValuePoints = ComparisonMetrics{
+		CurrentMetrics: DynatraceMetricsResponse{
+			Metrics: []MetricValuesArray{
+				{
+					MetricId: "dummy_metric_name:avg",
 					MetricValues: []MetricValues{
 						{},
 					},
 				},
 			},
 		},
+	}
+
+	missingPreviousComparisonMetrics = ComparisonMetrics{
+		CurrentMetrics: DynatraceMetricsResponse{
+			Metrics: []MetricValuesArray{
+				{
+					MetricId: "dummy_metric_name:avg",
+					MetricValues: []MetricValues{
+						{
+							Values: []float64{12.34},
+						},
+					},
+				},
+				{
+					MetricId: "dummy_metric_name:percentile(90)",
+					MetricValues: []MetricValues{
+						{
+							Values: []float64{12.34},
+						},
+					},
+				},
+			},
+		},
 		PreviousMetrics: DynatraceMetricsResponse{
-			Metrics: map[string]MetricValuesArray{
-				"dummy_metric_name:avg": {
+			Metrics: []MetricValuesArray{
+				{
+					MetricId:     "dummy_metric_name:avg",
 					MetricValues: nil,
 				},
-				"dummy_metric_name:percentile(90)": {
+				{
+					MetricId:     "dummy_metric_name:percentile(90)",
 					MetricValues: nil,
 				},
 			},
@@ -165,6 +203,16 @@ var (
 // GetMissingComparisonMetrics returns a ComparisonMetrics missing Metrics
 func GetMissingComparisonMetrics() ComparisonMetrics {
 	return missingComparisonMetrics
+}
+
+// GetMissingMetricValues returns a ComparisonMetrics missing responses
+func GetMissingMetricValues() ComparisonMetrics {
+	return missingMetricValues
+}
+
+// GetMissingMetricValuePoints returns a ComparisonMetrics missing value points
+func GetMissingMetricValuePoints() ComparisonMetrics {
+	return missingMetricValuePoints
 }
 
 // GetMissingPreviousComparisonMetrics returns a ComparisonMetrics missing Metrics
