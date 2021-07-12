@@ -1,6 +1,16 @@
 # goDynaPerfSignature
 goDynaPerfSignature is an Automated Quality Gate for Dynatrace. It is a standalone Go application which can query Dynatrace environments and compare Service metrics.
 
+# In this Readme
+* [How it works](#how-it-works)
+* [Running goDynaPerfSignature](#running-godynaperfsignature)
+* [Calling the Application](#calling-the-application)
+  * [Required Parameters](#required-parameters)
+  * [Optional Parameters](#optional-parameters)
+  * [Returned Json](#returned-json)
+* [Breaking Change in Release 1.7.0](breaking-change-in-release-1-7-0)
+
+# How it works
 [Deployment Events](https://www.dynatrace.com/support/help/shortlink/event-types-info#deployment) must be pushed to Dynatrace for goDynaPerfSignature to know when to evaluate metrics.
 
 This application:
@@ -36,13 +46,12 @@ Below are the required parameters to query goDynaPerfSignature:
 ## Required Parameters
 * **APIToken** - Your Dynatrace API token which has the permission `Access problem and event feed, metrics, and topology`. This is not actually required if goDynaPerfSignature is started with a `DT_API_TOKEN`
 * **DTServer** - The Dynatrace Server to point to (FQDN). *Ex*: `haq1234.live.dynatrace.com`. This is not actually required if goDynaPerfSignature is started with a `DT_SERVER`
-* **PSMetrics** - A string-keyed map of the metric names you'd like to inspect, with their Optional values included in the map. *Example: `"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeThreshold":1.0,"ValidationMethod":"relative"},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}}`*
-  * The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API. *Example: `builtin:service.response.time:(avg)`*
-    * (Optional) **ValidationMethod** - The type of validation you'd like to perform. If no value, the default is the comparison model using the most recent and last deployments. The other options are:
+* **PSMetrics** - A string-keyed map of the metric names you'd like to inspect, with their Optional values included in the map. Please see [below for an example](breaking-change-in-release-1-7-0). The list of metric IDs can be found from the `Environment API v2` -> `Metrics` -> `GET /metrics/descriptors` API.
+    * **ValidationMethod** (Optional) - The type of validation you'd like to perform. If no value, the default is the comparison model using the most recent and last deployments. The other options are:
       * `relative` - If you are willing to have some amount of degradation, you can provide a RelativeThreshold for leniancy in the comparison
       * `static` - If you want to use a static hard-corded threshold
-    * (Optional) **RelativeThreshold** - If you chose the ValidationMethod `relative`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
-    * (Optional) **StaticThreshold** - If you chose the ValidationMethod `static`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
+    * **RelativeThreshold** (Optional) - If you chose the ValidationMethod `relative`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
+    * **StaticThreshold** (Optional) - If you chose the ValidationMethod `static`, you will need to provide the threshold value here. If you do not, the value will default to 0.00.
       * `1.25`
 * **ServiceID** - The ID of the Service which you'd like to inspect. This can be found in the UI if you are looking at a Service and pull from its url `id=SERVICE-...`
   * `SERVICE-5D4E743B2BF0CCF5`
@@ -52,7 +61,7 @@ Below are the required parameters to query goDynaPerfSignature:
 * **EvaluationMins** - If you would rather provide an evaluation timeframe than use the duration of Deployment Events, provide a number of minutes in this field. goDynaPerfSignature will evaluate metrics from the beginning of the discovered Deployment Events for the EvaluationMinutes duration. *Ex*: `5`
 * **EventAge** - Set the number of days to look for Events pushed to the Events API. Use this in case you haven't pushed a new event in the last 30 days, which is the default timeframe Dynatrace queries for. *Ex*: `180`
 
-## Returned Parameters
+## Returned JSON
 Upon calling goDynaPerfSignature, the app will return a JSON payload with the following details:
 * **Error** - `True`/`False` - Was there an error processing the request? This could be reading from Dynatrace, building requests, or parsing returned data
 * **Pass** - `True`/`False` - Was this a successful deployment? If all criteria was met, this will return `true`
@@ -61,15 +70,36 @@ Upon calling goDynaPerfSignature, the app will return a JSON payload with the fo
 ## Examples
 This example queries two different metrics:
 ```
-curl -XPOST -d '{"APIToken":"My_API_Token","EventAge":180,"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeThreshold":1.0,"ValidationMethod":"relative"},"builtin:service.errors.total.rate:(avg)":{"StaticThreshold":1.0,"ValidationMethod":"static"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+curl -XPOST -d '{
+  "EventAge":180,
+  "PSMetrics":{
+    "builtin:service.response.time:(avg)":{
+      "RelativeThreshold":1.0,
+      "ValidationMethod":"relative"
+    },
+    "builtin:service.errors.total.rate:(avg)":{
+      "StaticThreshold":1.0,
+      "ValidationMethod":"static"
+    }
+  },
+  "ServiceID":"SERVICE-5D4E743B2BF0CCF5"}
+' localhost:8080/performanceSignature
 ```
 
 This example queries for a percentile and does not provide the APIToken. This call will only work if goDynaPerfSignature is started with an DT_API_TOKEN configured:
 ```
-curl -XPOST -d '{"PSMetrics":{"builtin:service.response.time:(avg)":{"RelativeThreshold":1.0,"ValidationMethod":"relative"}},"ServiceID":"SERVICE-5D4E743B2BF0CCF5"}' localhost:8080/performanceSignature
+curl -XPOST -d '{
+  "PSMetrics":{
+    "builtin:service.response.time:(avg)":{
+      "RelativeThreshold":1.0,
+      "ValidationMethod":"relative"
+    }
+  },
+  "ServiceID":"SERVICE-5D4E743B2BF0CCF5"}
+' localhost:8080/performanceSignature
 ```
 
-## Breaking Change in release 1.7.0
+# Breaking Change in Release 1.7.0
 There was a breaking change introduced in version 1.7.0, when the app was updated to use the new Dynatrace API endpoint. The "Metrics" parameter was renamed to "PSMetrics". The new "PSMetrics" parameter is no longer an array of objects with ID's equal to the metric names, but instead a map of objects keyed off the metric names.
 ```
 "Metrics": [
